@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>tayari1: study smarter</title>
+<title>updated: study smarter</title>
 <meta name="theme-color" content="#0A0B12">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon-192.png">
@@ -27,12 +27,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .hi{font:inherit;font-size:15px;color:var(--ink);background:transparent;border:0;border-radius:10px;padding:8px 10px;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hi:hover{background:var(--card)}
 .main{display:flex;flex-direction:column;min-width:0;min-height:100vh;min-height:100dvh}
-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
-#menu{display:none}
+#menu{display:none;position:fixed;top:10px;left:10px;z-index:15}
 #stage{flex:1;padding:0 18px 12px}
 #dockSlot{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 22%)}
 .col{max-width:760px;margin:0 auto}
-#empty{padding-top:7vh;text-align:center}
+#empty{padding-top:9vh;text-align:center}
 .orb{width:96px;height:96px;margin:0 auto 22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff9,transparent 38%),radial-gradient(circle,#FFD65A 0,#FF9F1C 42%,#6A3FFF 100%);box-shadow:0 0 0 7px #ffffff10,0 0 70px #7C6CFF99,0 0 130px #FFB02033;animation:b 5s ease-in-out infinite}
 @keyframes b{50%{transform:scale(1.06)}}
 h1{font-size:clamp(30px,5vw,50px);line-height:1.05;font-weight:800;letter-spacing:-.03em;margin:0 0 10px}
@@ -72,6 +71,7 @@ th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-ali
 th{background:#7C6CFF22}
 .tag{font-weight:800;border-radius:8px;padding:2px 9px;font-size:14px;white-space:nowrap}
 .t-must{background:#FF5A3633;color:#FF9C85}.t-should{background:#FFB02033;color:#FFD27A}.t-skip{background:#ffffff14;color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
 .tools{display:flex;gap:8px;margin-top:14px}
 .tools button{font:inherit;font-size:14px;border:1.2px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:6px 11px;cursor:pointer}
 .muted{color:var(--muted)}.err{color:#FF8A8F;font-weight:600}
@@ -90,7 +90,7 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
  .app{grid-template-columns:1fr}
  #side{position:fixed;inset:0 auto 0 0;width:280px;z-index:20;transform:translateX(-102%);transition:transform .2s}
  #side.open{transform:none}
- #menu{display:block}.cards{grid-template-columns:1fr}#empty{padding-top:3vh}
+ #menu{display:block}.cards{grid-template-columns:1fr}#empty{padding-top:3vh}#stage{padding-top:54px}
 }
 @media (prefers-reduced-motion:reduce){.orb,.pulse{animation:none}#side,.card{transition:none}}
 @media print{body{background:#fff;color:#000}body::before,#side,header,#dock,.tools,.note{display:none}.app,.main,#stage{display:block;height:auto;min-height:0}.answer{border:0;background:#fff;color:#000}th,td{border-color:#999}}
@@ -99,15 +99,15 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
 </head>
 <body>
 <div class="app" id="app">
+  <button class="btn" id="menu" aria-label="Open menu">☰</button>
   <aside id="side">
-    <div class="brand"><i></i>tayari1</div>
+    <div class="brand"><i></i>updated</div>
     <button class="btn" id="newChat">+ New chat</button>
     <div id="hist"></div>
     <button class="btn" id="aboutBtn">About me</button>
   </aside>
 
   <section class="main">
-    <header><button class="btn" id="menu" aria-label="Open menu">☰</button><span></span><button class="btn" id="aboutTop">About</button></header>
     <div id="stage">
       <div class="col">
         <div id="empty">
@@ -135,7 +135,7 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
       </div>
     </div>
     <div id="dockSlot"></div>
-    <p class="note">AI can make mistakes. Check important facts with your textbook or teacher. · v3.3</p>
+    <p class="note">AI can make mistakes. Check important facts with your textbook or teacher. · v3.6</p>
   </section>
 </div>
 
@@ -157,9 +157,9 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
 
 <dialog id="aboutDlg">
   <h2>About me</h2>
-  <p>Hi, I'm <b>[YOUR NAME]</b>. I'm a [student / builder] who got tired of study tools that explain everything the same boring way.</p>
+  <p>Hi, I'm <b>Bhavesh Choudhary</b>. I'm a builder who got tired of study tools that explain everything the same boring way.</p>
   <p>So I'm building this: if your exam is close, it plans your hours around your syllabus. If you have time, it teaches you in the world you love.</p>
-  <p class="muted">[Add one more line: why you started this, and how students can send feedback.]</p>
+  <p class="muted">Tried it? Tell me what felt useful and what should be fixed next. I read every message.</p>
   <div class="acts"><button class="go" id="aClose">Close</button></div>
 </dialog>
 
@@ -180,6 +180,7 @@ function md(src){let o="",l=false,t=[];const cl=()=>{if(l){o+="</ul>";l=false}};
   if(/^\s*\|/.test(x)){cl();t.push(x);continue}else ft();
   if(/^#{1,4}\s/.test(x)){cl();o+="<h2>"+inl(x.replace(/^#{1,4}\s/,""))+"</h2>"}
   else if(/^\s*[-*•]\s+/.test(x)){if(!l){o+="<ul>";l=true}o+="<li>"+inl(x.replace(/^\s*[-*•]\s+/,""))+"</li>"}
+  else if(/^\s*-{3,}\s*$/.test(x)){cl();o+="<hr>"}
   else if(!x.trim())cl();else{cl();o+="<p>"+inl(x)+"</p>"}}
  cl();ft();return o}
 
@@ -195,7 +196,7 @@ function drawHist(){const h=$("hist");h.innerHTML=hist.length?'<div class="hl">R
 function place(home){(home?$("homeSlot"):$("dockSlot")).appendChild($("dock"));$("app").classList.toggle("chat",!home);$("empty").querySelectorAll(".orb,h1,.intro").forEach(n=>n.hidden=!home)}
 function newChat(){$("thread").innerHTML="";place(true);$("side").classList.remove("open");$("q").focus()}
 function addUser(t){const d=document.createElement("div");d.className="u";d.innerHTML='<div class="av">You</div><p>'+esc(t)+'</p>';$("thread").appendChild(d)}
-function addBot(){const d=document.createElement("div");d.innerHTML='<div class="u"><div class="av b"></div><span class="muted">tayari1</span></div><div class="answer"><p class="muted"><span class="pulse"></span>Thinking…</p></div>';$("thread").appendChild(d);d.scrollIntoView({behavior:"smooth",block:"start"});return d.querySelector(".answer")}
+function addBot(){const d=document.createElement("div");d.innerHTML='<div class="u"><div class="av b"></div><span class="muted">updated</span></div><div class="answer"><p class="muted"><span class="pulse"></span>Thinking…</p></div>';$("thread").appendChild(d);d.scrollIntoView({behavior:"smooth",block:"start"});return d.querySelector(".answer")}
 function fill(box,t){box.innerHTML=md(t)+'<div class="tools"><button class="cp">Copy</button><button class="pr">Print or save PDF</button></div>';
  box.querySelector(".cp").onclick=async(e)=>{try{await navigator.clipboard.writeText(t);e.target.textContent="Copied"}catch(x){e.target.textContent="Copy failed"}};
  box.querySelector(".pr").onclick=()=>window.print()}
@@ -230,7 +231,7 @@ $("rGo").onclick=()=>{
  if(bad){$("rerr").textContent=bad;$("rerr").hidden=false;return}
  $("rushDlg").close();
  ask(p,"🔥 Paper Kal Hai: "+p.topic+", "+p.examVal+" "+p.examUnit+" left")};
-$("aboutBtn").onclick=$("aboutTop").onclick=()=>$("aboutDlg").showModal();
+$("aboutBtn").onclick=()=>{$("side").classList.remove("open");$("aboutDlg").showModal()};
 $("aClose").onclick=()=>$("aboutDlg").close();
 $("newChat").onclick=newChat;
 $("menu").onclick=()=>$("side").classList.toggle("open");
