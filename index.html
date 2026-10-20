@@ -83,6 +83,12 @@ dialog h2{margin:0 0 4px;font-size:25px;font-weight:800;letter-spacing:-.02em}
 label{display:block;font-weight:600;margin:14px 0 6px}
 input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tb{font:inherit;font-size:18px;border:1.2px solid var(--line);background:transparent;border-radius:999px;padding:2px 10px;cursor:pointer;color:var(--ink)}
+#lang{width:auto;padding:4px 8px;font-size:14px;border-radius:999px;border-width:1.2px}
+.pvi{position:relative;display:inline-block;margin:2px 6px 8px}
+.pvi img{max-height:90px;border-radius:12px;display:block}
+.pvi button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--a);color:#1a1200;font-weight:800;cursor:pointer}
+.uimg{max-height:130px;max-width:100%;border-radius:12px;margin-top:8px;display:block}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .acts{display:flex;gap:8px;margin-top:18px}
 .acts .go{flex:1;font:inherit;font-weight:800;font-size:17px;border:0;border-radius:13px;padding:13px;background:var(--a);color:#1a1200;cursor:pointer}
@@ -104,6 +110,7 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
     <div class="brand"><i></i>updated</div>
     <button class="btn" id="newChat">+ New chat</button>
     <div id="hist"></div>
+    <div id="acct" hidden><button class="btn" id="loginBtn" style="width:100%">Log in / Sign up</button></div>
     <button class="btn" id="aboutBtn">About me</button>
   </aside>
 
@@ -117,8 +124,12 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
           <div id="homeSlot">
             <div id="dock">
               <div class="comp">
-                <textarea id="q" rows="1" maxlength="300" placeholder="Type a topic or a doubt, e.g. Photosynthesis"></textarea>
+                <div id="pv" hidden></div>
+                <textarea id="q" rows="1" maxlength="300" placeholder="Type a topic or doubt. Hinglish chalega!"></textarea>
                 <div class="crow">
+                  <button class="tb" id="cam" type="button" title="Add a photo of your question or notes" aria-label="Add photo">📷</button>
+                  <input type="file" id="file" accept="image/*" hidden>
+                  <select id="lang" aria-label="Reply language"><option value="auto">Auto language</option><option value="english">English</option><option value="hinglish">Hinglish</option></select>
                   <span class="lab">Make it about</span><span id="ichips" class="crow" style="margin:0"></span>
                   <input id="interest" maxlength="60" placeholder="or type yours" aria-label="Your interest">
                   <button id="send" aria-label="Send">↑</button>
@@ -135,7 +146,7 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
       </div>
     </div>
     <div id="dockSlot"></div>
-    <p class="note">AI can make mistakes. Check important facts with your textbook or teacher. · v3.6</p>
+    <p class="note">AI can make mistakes. Check important facts with your textbook or teacher. · v4.0</p>
   </section>
 </div>
 
@@ -155,6 +166,18 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
   <div class="acts"><button class="btn" id="rCancel">Cancel</button><button class="go" id="rGo">Build my plan</button></div>
 </dialog>
 
+<dialog id="authDlg">
+  <h2 id="aT">Welcome back</h2>
+  <div class="muted">Log in to keep your chats on every device.</div>
+  <label for="em">Email</label>
+  <input id="em" type="email" autocomplete="email">
+  <label for="pw">Password</label>
+  <input id="pw" type="password" autocomplete="current-password" placeholder="At least 6 characters">
+  <p class="err" id="aerr" hidden></p>
+  <div class="acts"><button class="btn" id="aCancel">Cancel</button><button class="go" id="aGo">Log in</button></div>
+  <p style="text-align:center;margin:14px 0 0"><a href="#" id="aSw" style="color:var(--a)">New here? Create an account</a></p>
+</dialog>
+
 <dialog id="aboutDlg">
   <h2>About me</h2>
   <p>Hi, I'm <b>Bhavesh Choudhary</b>. I'm a builder who got tired of study tools that explain everything the same boring way.</p>
@@ -166,7 +189,9 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
 <script>
 const $=(i)=>document.getElementById(i);
 const INT=["Minecraft","Gossip","Cricket","K-pop","Free Fire","Anime"],LV=[["weak","Behind"],["average","Okay"],["strong","Strong"]];
-const S={interest:"",pd:4,lv:"average"};
+const S={interest:"",pd:4,lv:"average",img:"",imgUrl:""};
+// ---- LOGIN SETUP: paste your Supabase Project URL and anon key between the quotes (see SUPABASE_SETUP.txt) ----
+const SB={url:"",key:""};
 let hist=[];try{hist=JSON.parse(localStorage.getItem("tz3")||"[]")}catch(e){}
 const save=()=>{try{localStorage.setItem("tz3",JSON.stringify(hist.slice(0,20)))}catch(e){}};
 
@@ -195,27 +220,39 @@ function drawHist(){const h=$("hist");h.innerHTML=hist.length?'<div class="hl">R
 
 function place(home){(home?$("homeSlot"):$("dockSlot")).appendChild($("dock"));$("app").classList.toggle("chat",!home);$("empty").querySelectorAll(".orb,h1,.intro").forEach(n=>n.hidden=!home)}
 function newChat(){$("thread").innerHTML="";place(true);$("side").classList.remove("open");$("q").focus()}
-function addUser(t){const d=document.createElement("div");d.className="u";d.innerHTML='<div class="av">You</div><p>'+esc(t)+'</p>';$("thread").appendChild(d)}
+function addUser(t,img){const d=document.createElement("div");d.className="u";d.innerHTML='<div class="av">You</div><div><p>'+esc(t)+'</p>'+(img?'<img class="uimg" alt="Your photo" src="'+img+'">':"")+'</div>';$("thread").appendChild(d)}
 function addBot(){const d=document.createElement("div");d.innerHTML='<div class="u"><div class="av b"></div><span class="muted">updated</span></div><div class="answer"><p class="muted"><span class="pulse"></span>Thinking…</p></div>';$("thread").appendChild(d);d.scrollIntoView({behavior:"smooth",block:"start"});return d.querySelector(".answer")}
 function fill(box,t){box.innerHTML=md(t)+'<div class="tools"><button class="cp">Copy</button><button class="pr">Print or save PDF</button></div>';
  box.querySelector(".cp").onclick=async(e)=>{try{await navigator.clipboard.writeText(t);e.target.textContent="Copied"}catch(x){e.target.textContent="Copy failed"}};
  box.querySelector(".pr").onclick=()=>window.print()}
 function open(e){$("thread").innerHTML="";place(false);addUser(e.title);fill(addBot(),e.text)}
 
-async function ask(p,title){
- const k=JSON.stringify(p).toLowerCase(),f=hist.find(h=>h.k===k);
- $("thread").innerHTML="";place(false);addUser(title);const box=addBot();
+async function ask(p,title,img){
+ const k=p.image?"img"+Date.now():JSON.stringify(p).toLowerCase(),f=p.image?null:hist.find(h=>h.k===k);
+ $("thread").innerHTML="";place(false);addUser(title,img);const box=addBot();
  if(f)return fill(box,f.text);
  $("send").disabled=true;
  try{const r=await fetch("/api/explain",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"Something went wrong.");
-  hist.unshift({k,title,text:d.text});save();drawHist();fill(box,d.text)}
+  hist.unshift({k,title,text:d.text});save();drawHist();fill(box,d.text);if(user&&sb)sb.from("chats").insert({k,title,text:d.text}).then(()=>{},()=>{})}
  catch(e){box.innerHTML='<p class="err">'+esc(e.message||"Could not reach the server. Check your internet.")+'</p>'}
  finally{$("send").disabled=false}}
 
-function send(){const q=$("q").value.trim();if(!q){$("q").focus();return}
+function send(){const q=$("q").value.trim();if(!q&&!S.img){$("q").focus();return}
  const i=$("interest").value.trim();S.interest=i;
- ask({mode:"story",topic:q,interest:i},q+(i?"  ·  in "+i:""));$("q").value="";$("q").style.height="auto";drawChips()}
+ const p={mode:"story",topic:q,interest:i,lang:$("lang").value};
+ if(S.img){p.image=S.img;p.imgMime="image/jpeg"}
+ ask(p,(S.img?"📷 ":"")+(q||"Photo question")+(i?"  ·  in "+i:""),S.imgUrl);
+ $("q").value="";$("q").style.height="auto";clearImg();drawChips()}
+function drawPv(){const v=$("pv");v.hidden=!S.imgUrl;v.innerHTML=S.imgUrl?'<span class="pvi"><img alt="Photo to send" src="'+S.imgUrl+'"><button aria-label="Remove photo" id="rmImg">✕</button></span>':"";if(S.imgUrl)$("rmImg").onclick=clearImg}
+function clearImg(){S.img="";S.imgUrl="";$("file").value="";drawPv()}
+function pickImage(f){if(!f)return;const im=new Image(),u=URL.createObjectURL(f);
+ im.onload=()=>{const sc=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+  c.getContext("2d").drawImage(im,0,0,c.width,c.height);const url=c.toDataURL("image/jpeg",.8);URL.revokeObjectURL(u);S.imgUrl=url;S.img=url.split(",")[1];drawPv()};
+ im.onerror=()=>{URL.revokeObjectURL(u);alert("Could not read that photo. Try a JPG or PNG.")};im.src=u}
+$("cam").onclick=()=>$("file").click();$("file").onchange=(e)=>pickImage(e.target.files[0]);
+try{$("lang").value=localStorage.getItem("tzl")||"auto"}catch(e){}
+$("lang").onchange=()=>{try{localStorage.setItem("tzl",$("lang").value)}catch(e){}}
 $("send").onclick=send;
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
 $("q").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px"});
@@ -226,7 +263,7 @@ $("rushCard").onclick=()=>{$("rerr").hidden=true;$("rushDlg").showModal()};
 $("rCancel").onclick=()=>$("rushDlg").close();
 $("examUnit").onchange=drawChips;
 $("rGo").onclick=()=>{
- const p={mode:"rush",topic:$("subject").value.trim(),examVal:$("examVal").value,examUnit:$("examUnit").value,perDay:S.pd,syllabus:$("syllabus").value.trim(),level:S.lv};
+ const p={mode:"rush",lang:$("lang").value,topic:$("subject").value.trim(),examVal:$("examVal").value,examUnit:$("examUnit").value,perDay:S.pd,syllabus:$("syllabus").value.trim(),level:S.lv};
  const bad=!p.topic?"Add your subject first.":!(+p.examVal>0)?"How much time is left?":!p.syllabus?"Tell me what syllabus is left. A rough note is fine.":"";
  if(bad){$("rerr").textContent=bad;$("rerr").hidden=false;return}
  $("rushDlg").close();
@@ -236,7 +273,30 @@ $("aClose").onclick=()=>$("aboutDlg").close();
 $("newChat").onclick=newChat;
 $("menu").onclick=()=>$("side").classList.toggle("open");
 
-drawChips();drawHist();place(true);
+// ---- login (only active when SB is filled in) ----
+let sb=null,user=null,signup=false;
+const acctLabel=()=>{$("loginBtn").textContent=user?"👤 "+user.email+" · Log out":"Log in / Sign up"};
+async function pull(){try{const {data}=await sb.from("chats").select("k,title,text").order("created_at",{ascending:false}).limit(20);
+ if(data){const seen=new Set();hist=[...data,...hist].filter(h=>!seen.has(h.k)&&seen.add(h.k)).slice(0,20);save();drawHist()}}catch(e){}}
+async function setUser(u){const ch=(u&&u.id)!==(user&&user.id);user=u;acctLabel();if(u&&ch)await pull()}
+async function initAuth(){if(!SB.url||!SB.key)return;$("acct").hidden=false;
+ await new Promise((ok)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";s.onload=ok;s.onerror=ok;document.head.appendChild(s)});
+ if(!window.supabase)return;sb=supabase.createClient(SB.url,SB.key);
+ const {data}=await sb.auth.getSession();setUser(data.session?data.session.user:null);
+ sb.auth.onAuthStateChange((_e,s)=>setUser(s?s.user:null))}
+const aerr=(m)=>{$("aerr").textContent=m;$("aerr").hidden=!m};
+function authMode(){$("aT").textContent=signup?"Create your account":"Welcome back";$("aGo").textContent=signup?"Sign up":"Log in";$("aSw").textContent=signup?"Have an account? Log in":"New here? Create an account";aerr("")}
+$("loginBtn").onclick=()=>{$("side").classList.remove("open");if(user&&sb){sb.auth.signOut();return}signup=false;authMode();$("authDlg").showModal()};
+$("aSw").onclick=(e)=>{e.preventDefault();signup=!signup;authMode()};
+$("aCancel").onclick=()=>$("authDlg").close();
+$("aGo").onclick=async()=>{if(!sb)return aerr("Login is not ready. Try again in a moment.");const email=$("em").value.trim(),password=$("pw").value;
+ if(!email||password.length<6)return aerr("Enter your email and a password with 6 or more characters.");
+ const r=signup?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
+ if(r.error)return aerr(r.error.message);
+ if(signup&&!r.data.session)return aerr("Check your email to confirm your account, then log in.");
+ $("authDlg").close()};
+
+drawChips();drawHist();place(true);initAuth();
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
 </body>

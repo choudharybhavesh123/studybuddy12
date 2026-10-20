@@ -1,5 +1,5 @@
 // Caches the page shell so the app opens fast. AI answers always go to the network.
-const CACHE = "updated-v9";
+const CACHE = "updated-v10";
 const SHELL = ["/", "/index.html", "/manifest.json", "/icon-192.png", "/icon-512.png"];
 self.addEventListener("install", (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL))));
 self.addEventListener("activate", (e) =>
