@@ -1,11 +1,11 @@
 {
-  "name": "StudyBuddy",
-  "short_name": "StudyBuddy",
+  "name": "Tayari",
+  "short_name": "Tayari",
   "description": "Crash plans for exam day, and explanations in the world you love.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F2F4FB",
-  "theme_color": "#4B3BFF",
+  "background_color": "#0A0B12",
+  "theme_color": "#0A0B12",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

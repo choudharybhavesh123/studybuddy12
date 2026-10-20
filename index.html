@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>StudyBuddy</title>
-<meta name="theme-color" content="#4B3BFF">
+<title>Tayari: study smarter</title>
+<meta name="theme-color" content="#0A0B12">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -12,182 +12,230 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#F2F4FB; --card:#FFFFFF; --ink:#12142B; --muted:#5E6384; --line:#DADEEF;
-  --accent:#4B3BFF; --accent-ink:#FFFFFF; --soft:#E7E5FF;
-  --font:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-}
-:root[data-mode="rush"]{ --accent:#E8431F; --soft:#FFE6DF; }
-@media (prefers-color-scheme:dark){
-  :root{ --bg:#0E1022; --card:#171A33; --ink:#EEF0FF; --muted:#9AA0C8; --line:#2A2E52; --soft:#262357; --accent:#8A7DFF; --accent-ink:#0E1022; }
-  :root[data-mode="rush"]{ --accent:#FF7A59; --soft:#3A2019; }
-}
-*{box-sizing:border-box}
-html{height:100%}
-body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5;
-  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
-h1{font-size:34px;line-height:1.05;font-weight:800;margin:8px 0 6px;letter-spacing:-.02em}
-.sub{color:var(--muted);margin:0 0 20px}
-.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px}
-.modes button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:12px 8px;border-radius:11px;cursor:pointer;text-align:left}
-.modes button small{display:block;font-weight:400;font-size:13px;opacity:.85}
-.modes button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+:root{color-scheme:dark;--bg:#0A0B12;--panel:#10121C;--card:#161927;--line:#272B42;--ink:#F2F3FA;--muted:#9499B8;--v:#7C6CFF;--a:#FFB020;--font:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 var(--font);overflow:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(60% 45% at 50% -5%,#5B4BFF66,transparent 70%),radial-gradient(40% 30% at 85% 0,#1E63FF44,transparent 70%)}
+.app{position:relative;display:grid;grid-template-columns:270px 1fr;height:100%}
+#side{background:var(--panel);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.brand{font-weight:800;font-size:22px;letter-spacing:-.02em;padding:2px 8px 8px;display:flex;align-items:center;gap:8px}
+.brand i{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE28A,var(--a) 55%,var(--v))}
+.btn{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left}
+.btn:hover{border-color:var(--v)}
+#hist{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.hl{color:var(--muted);font-size:13px;padding:8px 8px 2px}
+.hi{font:inherit;font-size:15px;color:var(--ink);background:transparent;border:0;border-radius:10px;padding:8px 10px;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi:hover{background:var(--card)}
+.main{display:flex;flex-direction:column;min-width:0;height:100%}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
+#menu{display:none}
+#stage{flex:1;overflow-y:auto;padding:0 18px}
+.col{max-width:760px;margin:0 auto}
+#empty{padding-top:7vh;text-align:center}
+.orb{width:96px;height:96px;margin:0 auto 22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff9,transparent 38%),radial-gradient(circle,#FFD65A 0,#FF9F1C 42%,#6A3FFF 100%);box-shadow:0 0 0 7px #ffffff10,0 0 70px #7C6CFF99,0 0 130px #FFB02033;animation:b 5s ease-in-out infinite}
+@keyframes b{50%{transform:scale(1.06)}}
+h1{font-size:clamp(30px,5vw,50px);line-height:1.05;font-weight:800;letter-spacing:-.03em;margin:0 0 10px}
+.intro{color:var(--muted);margin:0 auto 26px;max-width:560px}
+#dock{max-width:760px;margin:0 auto;width:100%;text-align:left}
+.comp{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:12px 12px 10px}
+.comp:focus-within{border-color:var(--v)}
+#q{width:100%;background:transparent;border:0;color:var(--ink);font:inherit;resize:none;outline:none;max-height:160px;padding:4px 6px}
+.crow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.lab{color:var(--muted);font-size:14px;margin-right:2px}
+.chip{font:inherit;font-size:14px;border:1.2px solid var(--line);background:transparent;color:var(--ink);padding:4px 11px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:#7C6CFF33;border-color:var(--v);font-weight:600}
+#interest{font:inherit;font-size:14px;color:var(--ink);background:transparent;border:1.2px dashed var(--line);border-radius:999px;padding:4px 11px;width:150px}
+#send{margin-left:auto;width:42px;height:42px;border-radius:50%;border:0;background:var(--a);color:#1a1200;font-size:20px;font-weight:800;cursor:pointer}
+#send:disabled{opacity:.5}
+:focus-visible{outline:3px solid var(--v);outline-offset:2px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.card{font:inherit;color:var(--ink);text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px)}
+.card b{display:block;font-size:20px;font-weight:800;letter-spacing:-.01em}
+.card span{color:var(--muted);font-size:15px;line-height:1.35;display:block;margin-top:2px}
+.c1:hover{border-color:var(--a)}.c1 b{color:var(--a)}
+.c2:hover{border-color:var(--v)}.c2 b{color:#A79CFF}
+.chat #dock{padding:8px 18px 14px}
+.chat .cards{display:none}
+.chat .intro-only{display:none}
+.u{display:flex;gap:10px;margin:22px 0 10px;align-items:flex-start}
+.av{flex:none;width:30px;height:30px;border-radius:50%;background:var(--v);display:grid;place-items:center;font-size:14px;font-weight:800}
+.av.b{background:radial-gradient(circle at 35% 30%,#FFE28A,var(--a) 60%,var(--v))}
+.u p{margin:3px 0 0;font-weight:600}
+.answer{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:4px 20px 18px;margin-bottom:8px}
+.answer h2{font-size:21px;margin:22px 0 6px;font-weight:800}
+.answer p{margin:8px 0}.answer ul{padding-left:20px;margin:6px 0}
+.tw{overflow-x:auto;margin:8px 0}
+table{border-collapse:collapse;min-width:100%;font-size:15px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#7C6CFF22}
+.tag{font-weight:800;border-radius:8px;padding:2px 9px;font-size:14px;white-space:nowrap}
+.t-must{background:#FF5A3633;color:#FF9C85}.t-should{background:#FFB02033;color:#FFD27A}.t-skip{background:#ffffff14;color:var(--muted)}
+.tools{display:flex;gap:8px;margin-top:14px}
+.tools button{font:inherit;font-size:14px;border:1.2px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:6px 11px;cursor:pointer}
+.muted{color:var(--muted)}.err{color:#FF8A8F;font-weight:600}
+.pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--a);margin-right:8px;animation:b 1s ease-in-out infinite}
+.note{color:var(--muted);font-size:13px;text-align:center;margin:8px 0 0}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:22px;width:min(480px,92vw);max-height:90vh}
+dialog::backdrop{background:#000b}
+dialog h2{margin:0 0 4px;font-size:25px;font-weight:800;letter-spacing:-.02em}
 label{display:block;font-weight:600;margin:14px 0 6px}
-label:first-child{margin-top:0}
-input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:12px}
-input[type=text]:focus,button:focus-visible,select:focus{outline:3px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);color:var(--ink);font-weight:600}
-.go{width:100%;margin-top:18px;font:inherit;font-weight:800;font-size:18px;border:0;border-radius:14px;padding:15px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
-.go[disabled]{opacity:.6;cursor:wait}
-#err{color:#C0262D;font-weight:600;margin:12px 0 0}
-@media (prefers-color-scheme:dark){#err{color:#FF8A8F}}
-#result{margin-top:16px}
-.answer{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 18px 18px}
-.answer h2{font-size:20px;margin:20px 0 6px;font-weight:800}
-.answer p{margin:8px 0}.answer ul{margin:6px 0;padding-left:20px}
-.answer .tw{overflow-x:auto;margin:8px 0}
-.answer table{border-collapse:collapse;min-width:100%;font-size:15px}
-.answer th,.answer td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
-.answer th{background:var(--soft)}
-.tools{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-.tools button{font:inherit;font-size:15px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
-.note{color:var(--muted);font-size:14px;margin-top:18px}
-.loading{color:var(--muted);padding:18px 4px}
-.pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:8px;animation:p 1s ease-in-out infinite}
-@keyframes p{50%{transform:scale(1.7);opacity:.5}}
-@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.acts{display:flex;gap:8px;margin-top:18px}
+.acts .go{flex:1;font:inherit;font-weight:800;font-size:17px;border:0;border-radius:13px;padding:13px;background:var(--a);color:#1a1200;cursor:pointer}
+@media (max-width:860px){
+ .app{grid-template-columns:1fr}
+ #side{position:fixed;inset:0 auto 0 0;width:280px;z-index:20;transform:translateX(-102%);transition:transform .2s}
+ #side.open{transform:none}
+ #menu{display:block}.cards{grid-template-columns:1fr}#empty{padding-top:3vh}
+}
+@media (prefers-reduced-motion:reduce){.orb,.pulse{animation:none}#side,.card{transition:none}}
+@media print{body{background:#fff;color:#000;overflow:visible}body::before,#side,header,#dock,.tools,.note{display:none}.app,.main,#stage{display:block;height:auto;overflow:visible}.answer{border:0;background:#fff;color:#000}th,td{border-color:#999}}
 [hidden]{display:none!important}
 </style>
 </head>
 <body>
-<main>
-  <h1>StudyBuddy</h1>
-  <p class="sub">Exam soon? Get a crash plan. Got time? Learn it in a world you love.</p>
+<div class="app" id="app">
+  <aside id="side">
+    <div class="brand"><i></i>Tayari</div>
+    <button class="btn" id="newChat">+ New chat</button>
+    <div id="hist"></div>
+    <button class="btn" id="aboutBtn">About me</button>
+  </aside>
 
-  <div class="modes" role="group" aria-label="Choose a mode">
-    <button id="m-rush" aria-pressed="false">Rush<small>Exam is close</small></button>
-    <button id="m-story" aria-pressed="true">Story<small>Learn through my interests</small></button>
-  </div>
-
-  <div class="panel">
-    <label for="topic">What do you need to study?</label>
-    <input id="topic" type="text" maxlength="300" placeholder="e.g. Photosynthesis, Class 10 Science" autocomplete="off">
-
-    <div id="rushBox" hidden>
-      <label>How much time do you have?</label>
-      <div class="chips" id="timeChips"></div>
+  <section class="main">
+    <header><button class="btn" id="menu" aria-label="Open menu">☰</button><span></span><button class="btn" id="aboutTop">About</button></header>
+    <div id="stage">
+      <div class="col">
+        <div id="empty">
+          <div class="orb" aria-hidden="true"></div>
+          <h1>Hey, what are we cracking today?</h1>
+          <p class="intro">Exam tomorrow? Doubt at 2 AM? Type a topic, or hit the panic button. I'll make it make sense.</p>
+          <div id="homeSlot">
+            <div id="dock">
+              <div class="comp">
+                <textarea id="q" rows="1" maxlength="300" placeholder="Type a topic or a doubt, e.g. Photosynthesis"></textarea>
+                <div class="crow">
+                  <span class="lab">Make it about</span><span id="ichips" class="crow" style="margin:0"></span>
+                  <input id="interest" maxlength="60" placeholder="or type yours" aria-label="Your interest">
+                  <button id="send" aria-label="Send">↑</button>
+                </div>
+              </div>
+              <div class="cards">
+                <button class="card c1" id="rushCard"><b>🔥 Paper Kal Hai!</b><span>Exam close? Give me the time and syllabus. I'll build your survival plan.</span></button>
+                <button class="card c2" id="vibeCard"><b>🎮 Teach me my way</b><span>Minecraft, cricket, gossip... pick your world and I'll explain in it.</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="thread"></div>
+      </div>
     </div>
+    <div id="dockSlot"></div>
+    <p class="note">AI can make mistakes. Check important facts with your textbook or teacher.</p>
+  </section>
+</div>
 
-    <div id="storyBox">
-      <label>What do you love?</label>
-      <div class="chips" id="interestChips"></div>
-      <label for="interest">Or type your own</label>
-      <input id="interest" type="text" maxlength="60" placeholder="e.g. Free Fire, Taylor Swift, cooking" autocomplete="off">
-    </div>
+<dialog id="rushDlg">
+  <h2>🔥 Paper Kal Hai!</h2>
+  <div class="muted">Tell me your situation. I'll plan every hour.</div>
+  <label for="subject">Subject</label>
+  <input id="subject" maxlength="200" placeholder="e.g. Class 10 Science" autocomplete="off">
+  <label for="examVal">My exam is in</label>
+  <div class="row"><input id="examVal" type="number" min="1" max="60" value="3"><select id="examUnit"><option value="days">days</option><option value="hours">hours</option></select></div>
+  <div id="pdBox"><label>Hours I can study each day</label><div class="chips" id="pdChips"></div></div>
+  <label for="syllabus">Syllabus left</label>
+  <textarea id="syllabus" rows="4" maxlength="3000" placeholder="Paste chapters or topics. Or write: 12 chapters, haven't started 7."></textarea>
+  <label>Where do I stand?</label>
+  <div class="chips" id="lvChips"></div>
+  <p class="err" id="rerr" hidden></p>
+  <div class="acts"><button class="btn" id="rCancel">Cancel</button><button class="go" id="rGo">Build my plan</button></div>
+</dialog>
 
-    <button class="go" id="go">Teach me</button>
-    <p id="err" role="alert" hidden></p>
-  </div>
-
-  <div id="result" aria-live="polite"></div>
-  <p class="note">AI can make mistakes. Check important facts with your textbook or teacher.</p>
-</main>
+<dialog id="aboutDlg">
+  <h2>About me</h2>
+  <p>Hi, I'm <b>[YOUR NAME]</b>. I'm a [student / builder] who got tired of study tools that explain everything the same boring way.</p>
+  <p>So I'm building this: if your exam is close, it plans your hours around your syllabus. If you have time, it teaches you in the world you love.</p>
+  <p class="muted">[Add one more line: why you started this, and how students can send feedback.]</p>
+  <div class="acts"><button class="go" id="aClose">Close</button></div>
+</dialog>
 
 <script>
-const $ = (id) => document.getElementById(id);
-const TIMES = [15, 30, 60, 120];
-const INTERESTS = ["Minecraft","Gossip","Cricket","K-pop","Free Fire","Anime","Instagram","Cooking"];
-let mode = "story", minutes = 60, interest = "";
+const $=(i)=>document.getElementById(i);
+const INT=["Minecraft","Gossip","Cricket","K-pop","Free Fire","Anime"],LV=[["weak","Behind"],["average","Okay"],["strong","Strong"]];
+const S={interest:"",pd:4,lv:"average"};
+let hist=[];try{hist=JSON.parse(localStorage.getItem("tz3")||"[]")}catch(e){}
+const save=()=>{try{localStorage.setItem("tz3",JSON.stringify(hist.slice(0,20)))}catch(e){}};
 
-function esc(s){return s.replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");}
+const esc=(s)=>s.replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inl=(s)=>esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");
+const cell=(s)=>{const t=s.trim().toLowerCase().replace(/\*/g,""),m=/^(must|should|skip)$/.exec(t);return m?`<span class="tag t-${m[1]}">${t[0].toUpperCase()+t.slice(1)}</span>`:inl(s.trim())};
+function md(src){let o="",l=false,t=[];const cl=()=>{if(l){o+="</ul>";l=false}};
+ const ft=()=>{if(!t.length)return;const r=t.filter(x=>!/^\s*\|?[\s:-]+(\|[\s:-]+)*\|?\s*$/.test(x)).map(x=>x.trim().replace(/^\||\|$/g,"").split("|").map(cell));
+  o+='<div class="tw"><table>'+r.map((x,i)=>"<tr>"+x.map(c=>i?`<td>${c}</td>`:`<th>${c}</th>`).join("")+"</tr>").join("")+"</table></div>";t=[]};
+ for(const raw of src.split("\n")){const x=raw.trimEnd();
+  if(/^\s*\|/.test(x)){cl();t.push(x);continue}else ft();
+  if(/^#{1,4}\s/.test(x)){cl();o+="<h2>"+inl(x.replace(/^#{1,4}\s/,""))+"</h2>"}
+  else if(/^\s*[-*•]\s+/.test(x)){if(!l){o+="<ul>";l=true}o+="<li>"+inl(x.replace(/^\s*[-*•]\s+/,""))+"</li>"}
+  else if(!x.trim())cl();else{cl();o+="<p>"+inl(x)+"</p>"}}
+ cl();ft();return o}
 
-// Tiny safe Markdown renderer: headings, bullets, bold, tables.
-function md(src){
-  const lines = src.split("\n"); let out = "", list = false, tbl = [];
-  const closeList = () => { if(list){ out += "</ul>"; list = false; } };
-  const flushTbl = () => {
-    if(!tbl.length) return;
-    const rows = tbl.filter(r => !/^\s*\|?[\s:-]+(\|[\s:-]+)*\|?\s*$/.test(r))
-      .map(r => r.trim().replace(/^\||\|$/g,"").split("|").map(c => inline(c.trim())));
-    out += '<div class="tw"><table>' + rows.map((r,i)=>"<tr>"+r.map(c=>i?`<td>${c}</td>`:`<th>${c}</th>`).join("")+"</tr>").join("") + "</table></div>";
-    tbl = [];
-  };
-  for(const raw of lines){
-    const l = raw.trimEnd();
-    if(/^\s*\|/.test(l)){ closeList(); tbl.push(l); continue; } else flushTbl();
-    if(/^#{1,4}\s/.test(l)){ closeList(); out += "<h2>"+inline(l.replace(/^#{1,4}\s/,""))+"</h2>"; }
-    else if(/^\s*[-*•]\s+/.test(l)){ if(!list){ out += "<ul>"; list = true; } out += "<li>"+inline(l.replace(/^\s*[-*•]\s+/,""))+"</li>"; }
-    else if(l.trim()===""){ closeList(); }
-    else { closeList(); out += "<p>"+inline(l)+"</p>"; }
-  }
-  closeList(); flushTbl(); return out;
-}
+function chips(box,items,on,pick,fmt){box.innerHTML="";items.forEach(v=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=fmt?fmt(v):v;b.setAttribute("aria-pressed",on(v));b.onclick=()=>{pick(v);drawChips()};box.appendChild(b)})}
+function drawChips(){
+ chips($("ichips"),INT,v=>v===S.interest,v=>{S.interest=S.interest===v?"":v;$("interest").value=S.interest});
+ chips($("pdChips"),[2,4,6,8,10],v=>v===S.pd,v=>S.pd=v,v=>v+" hrs");
+ chips($("lvChips"),LV,v=>v[0]===S.lv,v=>S.lv=v[0],v=>v[1]);
+ $("pdBox").hidden=$("examUnit").value!=="days"}
+function drawHist(){const h=$("hist");h.innerHTML=hist.length?'<div class="hl">Recent</div>':'<div class="hl">Your chats will show here</div>';
+ hist.forEach((e,i)=>{const b=document.createElement("button");b.className="hi";b.textContent=e.title;b.title=e.title;b.onclick=()=>{open(e);$("side").classList.remove("open")};h.appendChild(b)})}
 
-function chips(box, items, isOn, onPick, fmt){
-  box.innerHTML = "";
-  items.forEach(v => {
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = fmt ? fmt(v) : v;
-    b.setAttribute("aria-pressed", isOn(v));
-    b.onclick = () => { onPick(v); render(); };
-    box.appendChild(b);
-  });
-}
-function render(){
-  document.documentElement.dataset.mode = mode;
-  $("m-rush").setAttribute("aria-pressed", mode==="rush");
-  $("m-story").setAttribute("aria-pressed", mode==="story");
-  $("rushBox").hidden = mode !== "rush";
-  $("storyBox").hidden = mode !== "story";
-  chips($("timeChips"), TIMES, v => v===minutes, v => minutes = v, v => v>=60 ? (v/60)+" hr" : v+" min");
-  chips($("interestChips"), INTERESTS, v => v.toLowerCase()===interest.toLowerCase(), v => { interest = v; $("interest").value = v; });
-  document.querySelector('meta[name="theme-color"]').content = mode==="rush" ? "#E8431F" : "#4B3BFF";
-}
-$("m-rush").onclick = () => { mode = "rush"; render(); };
-$("m-story").onclick = () => { mode = "story"; render(); };
-$("interest").oninput = (e) => { interest = e.target.value; render(); };
+function place(home){(home?$("homeSlot"):$("dockSlot")).appendChild($("dock"));$("app").classList.toggle("chat",!home);$("empty").querySelectorAll(".orb,h1,.intro").forEach(n=>n.hidden=!home)}
+function newChat(){$("thread").innerHTML="";place(true);$("side").classList.remove("open");$("q").focus()}
+function addUser(t){const d=document.createElement("div");d.className="u";d.innerHTML='<div class="av">You</div><p>'+esc(t)+'</p>';$("thread").appendChild(d)}
+function addBot(){const d=document.createElement("div");d.innerHTML='<div class="u"><div class="av b"></div><span class="muted">Tayari</span></div><div class="answer"><p class="muted"><span class="pulse"></span>Thinking…</p></div>';$("thread").appendChild(d);d.scrollIntoView({behavior:"smooth",block:"start"});return d.querySelector(".answer")}
+function fill(box,t){box.innerHTML=md(t)+'<div class="tools"><button class="cp">Copy</button><button class="pr">Print or save PDF</button></div>';
+ box.querySelector(".cp").onclick=async(e)=>{try{await navigator.clipboard.writeText(t);e.target.textContent="Copied"}catch(x){e.target.textContent="Copy failed"}};
+ box.querySelector(".pr").onclick=()=>window.print()}
+function open(e){$("thread").innerHTML="";place(false);addUser(e.title);fill(addBot(),e.text)}
 
-function showErr(m){ const e=$("err"); e.textContent=m; e.hidden=!m; }
+async function ask(p,title){
+ const k=JSON.stringify(p).toLowerCase(),f=hist.find(h=>h.k===k);
+ $("thread").innerHTML="";place(false);addUser(title);const box=addBot();
+ if(f)return fill(box,f.text);
+ $("send").disabled=true;
+ try{const r=await fetch("/api/explain",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+  const d=await r.json();if(!r.ok)throw new Error(d.error||"Something went wrong.");
+  hist.unshift({k,title,text:d.text});save();drawHist();fill(box,d.text)}
+ catch(e){box.innerHTML='<p class="err">'+esc(e.message||"Could not reach the server. Check your internet.")+'</p>'}
+ finally{$("send").disabled=false}}
 
-async function go(){
-  showErr("");
-  const topic = $("topic").value.trim();
-  if(!topic) return showErr("Type a topic first, like “Photosynthesis”.");
-  if(mode==="story" && !interest.trim()) return showErr("Pick something you love, or type your own.");
+function send(){const q=$("q").value.trim();if(!q){$("q").focus();return}
+ const i=$("interest").value.trim();S.interest=i;
+ ask({mode:"story",topic:q,interest:i},q+(i?"  ·  in "+i:""));$("q").value="";$("q").style.height="auto";drawChips()}
+$("send").onclick=send;
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
+$("q").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px"});
+$("interest").oninput=(e)=>{S.interest=e.target.value;drawChips()};
+$("vibeCard").onclick=()=>$("interest").focus();
 
-  const key = "sb:"+JSON.stringify([mode,topic.toLowerCase(),mode==="rush"?minutes:interest.toLowerCase()]);
-  let cached = null; try{ cached = localStorage.getItem(key); }catch(e){}
-  if(cached) return show(cached);
+$("rushCard").onclick=()=>{$("rerr").hidden=true;$("rushDlg").showModal()};
+$("rCancel").onclick=()=>$("rushDlg").close();
+$("examUnit").onchange=drawChips;
+$("rGo").onclick=()=>{
+ const p={mode:"rush",topic:$("subject").value.trim(),examVal:$("examVal").value,examUnit:$("examUnit").value,perDay:S.pd,syllabus:$("syllabus").value.trim(),level:S.lv};
+ const bad=!p.topic?"Add your subject first.":!(+p.examVal>0)?"How much time is left?":!p.syllabus?"Tell me what syllabus is left. A rough note is fine.":"";
+ if(bad){$("rerr").textContent=bad;$("rerr").hidden=false;return}
+ $("rushDlg").close();
+ ask(p,"🔥 Paper Kal Hai: "+p.topic+", "+p.examVal+" "+p.examUnit+" left")};
+$("aboutBtn").onclick=$("aboutTop").onclick=()=>$("aboutDlg").showModal();
+$("aClose").onclick=()=>$("aboutDlg").close();
+$("newChat").onclick=newChat;
+$("menu").onclick=()=>$("side").classList.toggle("open");
 
-  const btn = $("go"); btn.disabled = true; btn.textContent = "Working on it…";
-  $("result").innerHTML = '<div class="loading"><span class="pulse"></span>Building your '+(mode==="rush"?"crash plan":"story")+'…</div>';
-  try{
-    const r = await fetch("/api/explain",{method:"POST",headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({mode,topic,minutes,interest:interest.trim()})});
-    const d = await r.json();
-    if(!r.ok) throw new Error(d.error || "Something went wrong.");
-    try{ localStorage.setItem(key, d.text); }catch(e){}
-    show(d.text);
-  }catch(e){
-    $("result").innerHTML = ""; showErr(e.message || "Could not reach the server. Check your internet and try again.");
-  }finally{ btn.disabled = false; btn.textContent = "Teach me"; }
-}
-function show(text){
-  $("result").innerHTML = '<div class="answer">'+md(text)+'<div class="tools"><button id="copy">Copy</button><button id="again">New topic</button></div></div>';
-  $("copy").onclick = async (e) => { try{ await navigator.clipboard.writeText(text); e.target.textContent="Copied"; }catch(x){ e.target.textContent="Copy failed"; } };
-  $("again").onclick = () => { $("result").innerHTML=""; $("topic").value=""; $("topic").focus(); window.scrollTo({top:0}); };
-  $("result").scrollIntoView({behavior:"smooth",block:"start"});
-}
-$("go").onclick = go;
-$("topic").addEventListener("keydown", e => { if(e.key==="Enter") go(); });
-
-render();
-if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+drawChips();drawHist();place(true);
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
 </body>
 </html>

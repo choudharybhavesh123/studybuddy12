@@ -1,4 +1,4 @@
-STUDYBUDDY - HOW TO PUT IT ONLINE (FREE)
+TAYARI - HOW TO PUT IT ONLINE (FREE)
 
 1. Get a Gemini API key: aistudio.google.com -> "Get API key". Note a Flash model name shown there.
 2. Make a GitHub account, create a new repository, upload ALL files from this folder

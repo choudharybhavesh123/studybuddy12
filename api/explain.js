@@ -7,34 +7,57 @@ module.exports = async function handler(req, res) {
   const mode = b.mode === "story" ? "story" : "rush";
   const topic = clean(b.topic, 300);
   const interest = clean(b.interest, 60);
-  const level = clean(b.level, 40) || "school student";
-  const minutes = Math.min(Math.max(parseInt(b.minutes, 10) || 60, 10), 480);
+  const level = clean(b.level, 40) || "average";
+  const syllabus = String(b.syllabus || "").trim().slice(0, 3000);
+  const days = b.examUnit === "days";
+  const examVal = Math.min(Math.max(parseFloat(b.examVal) || 1, 0.25), 60);
+  const perDay = Math.min(Math.max(parseFloat(b.perDay) || 4, 1), 14);
+  const totalHours = Math.round((days ? examVal * perDay : examVal) * 10) / 10;
 
-  if (!topic) return res.status(400).json({ error: "Please enter a topic." });
-  if (mode === "story" && !interest) return res.status(400).json({ error: "Please pick an interest." });
+  if (!topic) return res.status(400).json({ error: "Please enter a subject or topic." });
+  if (mode === "rush" && !syllabus) return res.status(400).json({ error: "Tell us what syllabus is left." });
 
   const system =
-    "You are StudyBuddy, a friendly tutor for school students in India. " +
+    "You are a study coach for school and college students in India. " +
     "Be accurate first. If you are unsure about a fact, say so. " +
     "Use simple English, short sentences, and Markdown (## headings, - bullets, **bold**, tables). " +
     "Only help with studying. Keep everything safe and age-appropriate.";
 
   const prompt =
     mode === "rush"
-      ? `A student (${level}) has ${minutes} minutes before an exam on: ${topic}.
-Make a crash plan:
-## Learn these first
-The 5 highest-scoring ideas, one line each on why it scores.
-## Skip these
-What to ignore in this time, and why.
-## Your ${minutes}-minute plan
-A table: Time block | What to do. Last 5 minutes = review mistakes only.
-## Quick notes
-For each of the 5 ideas: a 3-line explanation, one memory trick, 2 quick questions.
-## Answer check
-Short answers to your quick questions.
-Be direct. No fluff.`
-      : `Explain "${topic}" to a ${level} who loves ${interest}.
+      ? `Build a detailed exam survival plan.
+Subject: ${topic}
+Exam is in: ${examVal} ${days ? "day(s)" : "hour(s)"}
+Real study time available: about ${totalHours} hours${days ? ` (${perDay} hours per day)` : ""}
+Student level: ${level}
+Syllabus left:
+${syllabus}
+
+Write these sections exactly:
+## Reality check
+2 honest lines: how much of this can be covered in the time, and what score is realistic.
+## Priority map
+A table: Topic | Priority | Time | Why. Priority must be exactly Must, Should or Skip. Times must add up to no more than ${totalHours} hours including breaks and revision.
+## Your timeline
+A table: When | What to do | Goal. ${days ? "Go day by day (Day 1, Day 2...), with a morning, afternoon and evening slot." : "Go in blocks of 10-30 minutes."} Include short breaks, one revision slot, and a mini self-test. Do not schedule the last night badly: sleep matters.
+## Memory tricks
+For each Must topic: 3 lines of key points plus one memory trick.
+## Practice questions
+2 likely exam questions per Must topic, with short answers.
+## Last 30 minutes before the exam
+A short checklist.
+Be specific to this syllabus. No generic advice.`
+      : !interest
+      ? `Explain "${topic}" simply to an Indian school student. If it is a question, answer it directly first.
+## In simple words
+A clear explanation in short sentences.
+## Example
+One everyday example.
+## Exam-ready version
+How to write it in an exam, in plain words.
+## Test yourself
+2 exam-style questions, then short answers.`
+      : `Explain "${topic}" to a ${level === "average" ? "school student" : level + " student"} who loves ${interest}.
 Use ${interest} as the main analogy all the way through.
 ## The story
 Explain the idea as if it happens inside the world of ${interest}.
