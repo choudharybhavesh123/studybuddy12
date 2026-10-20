@@ -47,29 +47,54 @@ The proper textbook-style definition in plain words, as it should be written in 
 ## Test yourself
 2 exam-style questions, then short answers.`;
 
-  try {
-    const model = process.env.GEMINI_MODEL; // copy exact name from Google AI Studio
-    const key = process.env.GEMINI_API_KEY;
-    if (!model || !key) return res.status(500).json({ error: "Server is missing GEMINI_MODEL or GEMINI_API_KEY." });
+  const key = process.env.GEMINI_API_KEY;
+  const models = [process.env.GEMINI_MODEL, process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash"].filter(Boolean);
+  if (!models.length || !key) return res.status(500).json({ error: "Server is missing GEMINI_MODEL or GEMINI_API_KEY." });
 
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7 },
-        }),
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let lastStatus = 0, lastMsg = "";
+
+  // Try the main model, retry a couple of times if Google is busy, then try the backup model.
+  for (const model of models) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const r = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: system }] },
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.7 },
+            }),
+          }
+        );
+        const data = await r.json().catch(() => ({}));
+        if (r.ok) {
+          const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+          if (text) return res.status(200).json({ text });
+          lastStatus = 502;
+          lastMsg = data?.promptFeedback?.blockReason ? "Blocked: " + data.promptFeedback.blockReason : "Empty answer";
+          break; // try the next model
+        }
+        lastStatus = r.status;
+        lastMsg = data?.error?.message || "";
+        console.error("Gemini error", model, r.status, lastMsg);
+        if (r.status === 429 || r.status >= 500) { await sleep(1200 * (attempt + 1)); continue; }
+        break; // other errors (bad key, bad model name): go to next model
+      } catch (e) {
+        lastStatus = 500; lastMsg = String(e.message || e);
+        await sleep(800);
       }
-    );
-    if (r.status === 429) return res.status(429).json({ error: "Too many requests right now. Wait a minute and try again." });
-    const data = await r.json();
-    const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "";
-    if (!text) return res.status(502).json({ error: "No answer came back. Try rephrasing your topic." });
-    return res.status(200).json({ text });
-  } catch (e) {
-    return res.status(500).json({ error: "Something went wrong. Please try again." });
+    }
   }
+
+  const friendly =
+    lastStatus === 429 ? "Too many people are using the free AI right now. Wait a minute and try again."
+    : lastStatus === 503 ? "Google's AI is busy right now. Try again in a minute."
+    : lastStatus === 400 || lastStatus === 403 ? "Server setup problem (check the API key and model name)."
+    : lastStatus === 404 ? "Model name not found. Check GEMINI_MODEL in Vercel."
+    : "No answer came back. Try again or rephrase your topic.";
+  return res.status(502).json({ error: friendly + (lastStatus ? " [code " + lastStatus + "]" : ""), detail: lastMsg.slice(0, 200) });
 };
