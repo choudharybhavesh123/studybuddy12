@@ -79,7 +79,7 @@ The proper textbook-style definition in plain words, as it should be written in 
   let lastStatus = 0, lastMsg = "";
 
   // Ask Google for one answer from one model. Retries if Google is busy.
-  async function callModel(model) {
+  async function callModel(model) {const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const r = await fetch(
