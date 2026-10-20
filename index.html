@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudyBuddy</title>
+<meta name="theme-color" content="#4B3BFF">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F4FB; --card:#FFFFFF; --ink:#12142B; --muted:#5E6384; --line:#DADEEF;
+  --accent:#4B3BFF; --accent-ink:#FFFFFF; --soft:#E7E5FF;
+  --font:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+:root[data-mode="rush"]{ --accent:#E8431F; --soft:#FFE6DF; }
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0E1022; --card:#171A33; --ink:#EEF0FF; --muted:#9AA0C8; --line:#2A2E52; --soft:#262357; --accent:#8A7DFF; --accent-ink:#0E1022; }
+  :root[data-mode="rush"]{ --accent:#FF7A59; --soft:#3A2019; }
+}
+*{box-sizing:border-box}
+html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5;
+  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:34px;line-height:1.05;font-weight:800;margin:8px 0 6px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 20px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px}
+.modes button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:12px 8px;border-radius:11px;cursor:pointer;text-align:left}
+.modes button small{display:block;font-weight:400;font-size:13px;opacity:.85}
+.modes button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+label{display:block;font-weight:600;margin:14px 0 6px}
+label:first-child{margin-top:0}
+input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:12px}
+input[type=text]:focus,button:focus-visible,select:focus{outline:3px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:15px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);color:var(--ink);font-weight:600}
+.go{width:100%;margin-top:18px;font:inherit;font-weight:800;font-size:18px;border:0;border-radius:14px;padding:15px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.go[disabled]{opacity:.6;cursor:wait}
+#err{color:#C0262D;font-weight:600;margin:12px 0 0}
+@media (prefers-color-scheme:dark){#err{color:#FF8A8F}}
+#result{margin-top:16px}
+.answer{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 18px 18px}
+.answer h2{font-size:20px;margin:20px 0 6px;font-weight:800}
+.answer p{margin:8px 0}.answer ul{margin:6px 0;padding-left:20px}
+.answer .tw{overflow-x:auto;margin:8px 0}
+.answer table{border-collapse:collapse;min-width:100%;font-size:15px}
+.answer th,.answer td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+.answer th{background:var(--soft)}
+.tools{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.tools button{font:inherit;font-size:15px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
+.note{color:var(--muted);font-size:14px;margin-top:18px}
+.loading{color:var(--muted);padding:18px 4px}
+.pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:8px;animation:p 1s ease-in-out infinite}
+@keyframes p{50%{transform:scale(1.7);opacity:.5}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>StudyBuddy</h1>
+  <p class="sub">Exam soon? Get a crash plan. Got time? Learn it in a world you love.</p>
+
+  <div class="modes" role="group" aria-label="Choose a mode">
+    <button id="m-rush" aria-pressed="false">Rush<small>Exam is close</small></button>
+    <button id="m-story" aria-pressed="true">Story<small>Learn through my interests</small></button>
+  </div>
+
+  <div class="panel">
+    <label for="topic">What do you need to study?</label>
+    <input id="topic" type="text" maxlength="300" placeholder="e.g. Photosynthesis, Class 10 Science" autocomplete="off">
+
+    <div id="rushBox" hidden>
+      <label>How much time do you have?</label>
+      <div class="chips" id="timeChips"></div>
+    </div>
+
+    <div id="storyBox">
+      <label>What do you love?</label>
+      <div class="chips" id="interestChips"></div>
+      <label for="interest">Or type your own</label>
+      <input id="interest" type="text" maxlength="60" placeholder="e.g. Free Fire, Taylor Swift, cooking" autocomplete="off">
+    </div>
+
+    <button class="go" id="go">Teach me</button>
+    <p id="err" role="alert" hidden></p>
+  </div>
+
+  <div id="result" aria-live="polite"></div>
+  <p class="note">AI can make mistakes. Check important facts with your textbook or teacher.</p>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const TIMES = [15, 30, 60, 120];
+const INTERESTS = ["Minecraft","Gossip","Cricket","K-pop","Free Fire","Anime","Instagram","Cooking"];
+let mode = "story", minutes = 60, interest = "";
+
+function esc(s){return s.replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");}
+
+// Tiny safe Markdown renderer: headings, bullets, bold, tables.
+function md(src){
+  const lines = src.split("\n"); let out = "", list = false, tbl = [];
+  const closeList = () => { if(list){ out += "</ul>"; list = false; } };
+  const flushTbl = () => {
+    if(!tbl.length) return;
+    const rows = tbl.filter(r => !/^\s*\|?[\s:-]+(\|[\s:-]+)*\|?\s*$/.test(r))
+      .map(r => r.trim().replace(/^\||\|$/g,"").split("|").map(c => inline(c.trim())));
+    out += '<div class="tw"><table>' + rows.map((r,i)=>"<tr>"+r.map(c=>i?`<td>${c}</td>`:`<th>${c}</th>`).join("")+"</tr>").join("") + "</table></div>";
+    tbl = [];
+  };
+  for(const raw of lines){
+    const l = raw.trimEnd();
+    if(/^\s*\|/.test(l)){ closeList(); tbl.push(l); continue; } else flushTbl();
+    if(/^#{1,4}\s/.test(l)){ closeList(); out += "<h2>"+inline(l.replace(/^#{1,4}\s/,""))+"</h2>"; }
+    else if(/^\s*[-*•]\s+/.test(l)){ if(!list){ out += "<ul>"; list = true; } out += "<li>"+inline(l.replace(/^\s*[-*•]\s+/,""))+"</li>"; }
+    else if(l.trim()===""){ closeList(); }
+    else { closeList(); out += "<p>"+inline(l)+"</p>"; }
+  }
+  closeList(); flushTbl(); return out;
+}
+
+function chips(box, items, isOn, onPick, fmt){
+  box.innerHTML = "";
+  items.forEach(v => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = fmt ? fmt(v) : v;
+    b.setAttribute("aria-pressed", isOn(v));
+    b.onclick = () => { onPick(v); render(); };
+    box.appendChild(b);
+  });
+}
+function render(){
+  document.documentElement.dataset.mode = mode;
+  $("m-rush").setAttribute("aria-pressed", mode==="rush");
+  $("m-story").setAttribute("aria-pressed", mode==="story");
+  $("rushBox").hidden = mode !== "rush";
+  $("storyBox").hidden = mode !== "story";
+  chips($("timeChips"), TIMES, v => v===minutes, v => minutes = v, v => v>=60 ? (v/60)+" hr" : v+" min");
+  chips($("interestChips"), INTERESTS, v => v.toLowerCase()===interest.toLowerCase(), v => { interest = v; $("interest").value = v; });
+  document.querySelector('meta[name="theme-color"]').content = mode==="rush" ? "#E8431F" : "#4B3BFF";
+}
+$("m-rush").onclick = () => { mode = "rush"; render(); };
+$("m-story").onclick = () => { mode = "story"; render(); };
+$("interest").oninput = (e) => { interest = e.target.value; render(); };
+
+function showErr(m){ const e=$("err"); e.textContent=m; e.hidden=!m; }
+
+async function go(){
+  showErr("");
+  const topic = $("topic").value.trim();
+  if(!topic) return showErr("Type a topic first, like “Photosynthesis”.");
+  if(mode==="story" && !interest.trim()) return showErr("Pick something you love, or type your own.");
+
+  const key = "sb:"+JSON.stringify([mode,topic.toLowerCase(),mode==="rush"?minutes:interest.toLowerCase()]);
+  let cached = null; try{ cached = localStorage.getItem(key); }catch(e){}
+  if(cached) return show(cached);
+
+  const btn = $("go"); btn.disabled = true; btn.textContent = "Working on it…";
+  $("result").innerHTML = '<div class="loading"><span class="pulse"></span>Building your '+(mode==="rush"?"crash plan":"story")+'…</div>';
+  try{
+    const r = await fetch("/api/explain",{method:"POST",headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({mode,topic,minutes,interest:interest.trim()})});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || "Something went wrong.");
+    try{ localStorage.setItem(key, d.text); }catch(e){}
+    show(d.text);
+  }catch(e){
+    $("result").innerHTML = ""; showErr(e.message || "Could not reach the server. Check your internet and try again.");
+  }finally{ btn.disabled = false; btn.textContent = "Teach me"; }
+}
+function show(text){
+  $("result").innerHTML = '<div class="answer">'+md(text)+'<div class="tools"><button id="copy">Copy</button><button id="again">New topic</button></div></div>';
+  $("copy").onclick = async (e) => { try{ await navigator.clipboard.writeText(text); e.target.textContent="Copied"; }catch(x){ e.target.textContent="Copy failed"; } };
+  $("again").onclick = () => { $("result").innerHTML=""; $("topic").value=""; $("topic").focus(); window.scrollTo({top:0}); };
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("go").onclick = go;
+$("topic").addEventListener("keydown", e => { if(e.key==="Enter") go(); });
+
+render();
+if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
