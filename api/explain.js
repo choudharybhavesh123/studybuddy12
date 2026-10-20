@@ -5,8 +5,11 @@ module.exports = async function handler(req, res) {
   const b = req.body || {};
   const clean = (s, n) => String(s || "").replace(/\s+/g, " ").trim().slice(0, n);
   const mode = b.mode === "story" ? "story" : "rush";
-  const topic = clean(b.topic, 300);
+  let topic = clean(b.topic, 300);
   const interest = clean(b.interest, 60);
+  const lang = ["english", "hinglish"].includes(b.lang) ? b.lang : "auto";
+  const imgMime = ["image/jpeg", "image/png", "image/webp"].includes(b.imgMime) ? b.imgMime : "image/jpeg";
+  const image = typeof b.image === "string" && /^[A-Za-z0-9+/=]+$/.test(b.image) && b.image.length < 3500000 ? b.image : "";
   const level = clean(b.level, 40) || "average";
   const syllabus = String(b.syllabus || "").trim().slice(0, 3000);
   const days = b.examUnit === "days";
@@ -14,15 +17,24 @@ module.exports = async function handler(req, res) {
   const perDay = Math.min(Math.max(parseFloat(b.perDay) || 4, 1), 14);
   const totalHours = Math.round((days ? examVal * perDay : examVal) * 10) / 10;
 
-  if (!topic) return res.status(400).json({ error: "Please enter a subject or topic." });
+  if (!topic && !image) return res.status(400).json({ error: "Please enter a subject or topic." });
+  if (!topic) topic = "the question or notes in the attached photo";
   if (mode === "rush" && !syllabus) return res.status(400).json({ error: "Tell us what syllabus is left." });
 
-  const system =
+  const baseSystem =
     "You are a study coach for school and college students in India. " +
     "Be accurate first. If you are unsure about a fact, say so. " +
-    "Use simple English, short sentences, and Markdown (## headings, - bullets, **bold**, tables). " +
+    "Use short sentences and Markdown (## headings, - bullets, **bold**, tables). " +
     "Never use LaTeX or dollar signs. Write formulas in plain text with Unicode, like 6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂ or (a+b)² = a² + 2ab + b². " +
     "Only help with studying. Keep everything safe and age-appropriate.";
+  const langRule = {
+    auto: "LANGUAGE: Reply in the same language style the student writes in. If they write Hinglish (Hindi in English letters, like 'mujhe photosynthesis samjhao'), reply in natural Hinglish. If they write Hindi in Devanagari, reply in Hindi. Otherwise reply in simple English.",
+    hinglish: "LANGUAGE: Reply in natural Hinglish: Hindi written in English letters, mixed with English words, the way Indian students chat with friends. Keep technical terms (like chlorophyll, equation) in English.",
+    english: "LANGUAGE: Reply in simple English.",
+  }[lang];
+  const funRule =
+    "TONE: Be a bit funny, like a cool older sibling who is good at studies. Add a short, relatable joke or playful line in most sections (exam panic, last-bench, mummy shouting, cricket, memes, chai). Never mock the student. No jokes inside definitions, formulas or practice answers, because accuracy comes first. Keep section headings in English, and write the Exam-ready version in clear English even when explaining in Hinglish.";
+  const system = baseSystem + " " + langRule + " " + funRule;
 
   const prompt =
     mode === "rush"
@@ -71,6 +83,9 @@ The proper textbook-style definition in plain words, as it should be written in 
 ## Test yourself
 2 exam-style questions, then short answers.`;
 
+  const userParts = image
+    ? [{ inlineData: { mimeType: imgMime, data: image } }, { text: "Look at the attached photo first (it may be a question, notes or a diagram), then do this:\n" + prompt }]
+    : [{ text: prompt }];
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(500).json({ error: "Server is missing GEMINI_API_KEY in Vercel." });
 
@@ -79,7 +94,7 @@ The proper textbook-style definition in plain words, as it should be written in 
   let lastStatus = 0, lastMsg = "";
 
   // Ask Google for one answer from one model. Retries if Google is busy.
-  async function callModel(model) 
+  async function callModel(model) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const r = await fetch(
@@ -89,7 +104,7 @@ The proper textbook-style definition in plain words, as it should be written in 
             headers: { "Content-Type": "application/json", "x-goog-api-key": key },
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: system }] },
-              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              contents: [{ role: "user", parts: userParts }],
               generationConfig: { temperature: 0.7 },
             }),
           }
