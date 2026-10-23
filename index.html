@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
 /* ==========================================================================
@@ -165,16 +166,16 @@ body::before {
 }
 @keyframes b { 50% { transform: scale(1.06); } }
 
-/* BIG, PROFESSIONAL CURSIVE / EDITORIAL HEADLINE */
+/* BIG, PROFESSIONAL EDITORIAL CURSIVE HEADLINE */
 #empty h1 {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 800;
-  font-size: clamp(42px, 6.5vw, 74px);
+  font-size: clamp(44px, 6.8vw, 76px);
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: var(--ink);
-  margin: 0 auto 14px;
+  margin: 0 auto 16px;
   max-width: 680px;
   text-shadow: 0 4px 24px rgba(108, 92, 255, 0.12);
 }
@@ -504,18 +505,21 @@ input, select, textarea {
   padding: 120px 24px 80px;
 }
 
-.l-hero-svg {
+#hero3DCanvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 1;
+  display: block;
 }
 
 .l-hero-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 2;
   background: 
     linear-gradient(180deg, rgba(9, 6, 26, 0.4) 0%, rgba(19, 14, 56, 0.1) 40%, rgba(9, 6, 26, 0.95) 95%),
     linear-gradient(90deg, rgba(9, 6, 26, 0.75) 0%, rgba(9, 6, 26, 0.2) 60%, rgba(9, 6, 26, 0.6) 100%);
@@ -800,36 +804,15 @@ input, select, textarea {
         <a href="#features" class="l-link">Exam Game Plan</a>
         <a href="#homework" class="l-link">Homework Helper</a>
         <a href="#teach-me" class="l-link">Teach Me My Way</a>
-        <a href="intro_video.html" target="_blank" class="l-link" style="color:#FFB37C;">🎬 3D Intro Video</a>
+        <a href="intro_video.html" target="_blank" class="l-link" style="color:#FFB37C;font-weight:700;">🎬 3D Video</a>
       </nav>
       <button type="button" class="l-cta" id="navEnterTool">Open Study Tool →</button>
     </div>
   </header>
 
-  <!-- Scene 1: Opening Hero -->
+  <!-- Scene 1: Opening Hero with Live 3D WebGL World -->
   <div class="l-hero" id="hero">
-    <svg class="l-hero-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#09061A"/>
-          <stop offset="35%" stop-color="#1A1248"/>
-          <stop offset="65%" stop-color="#3D1F6D"/>
-          <stop offset="85%" stop-color="#9C4773"/>
-          <stop offset="96%" stop-color="#FF7E54"/>
-          <stop offset="100%" stop-color="#FFB37C"/>
-        </linearGradient>
-        <radialGradient id="glow" cx="75%" cy="35%" r="45%">
-          <stop offset="0%" stop-color="#FFD166" stop-opacity="0.85"/>
-          <stop offset="50%" stop-color="#FF9F1C" stop-opacity="0.25"/>
-          <stop offset="100%" stop-color="#6C5CFF" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <rect width="1440" height="900" fill="url(#sky)"/>
-      <circle cx="1080" cy="300" r="280" fill="url(#glow)"/>
-      <path d="M0 580 Q240 470 480 530 T960 450 T1440 500 L1440 900 L0 900 Z" fill="#241452" opacity="0.8"/>
-      <path d="M0 660 Q320 570 640 630 T1200 580 T1440 640 L1440 900 L0 900 Z" fill="#150C36"/>
-      <path d="M0 760 Q360 690 720 740 T1440 730 L1440 900 L0 900 Z" fill="#090518"/>
-    </svg>
+    <canvas id="hero3DCanvas"></canvas>
     <div class="l-hero-overlay"></div>
 
     <div class="l-hero-content">
@@ -857,7 +840,7 @@ input, select, textarea {
           <span>Let's fix that</span>
           <span aria-hidden="true">→</span>
         </a>
-        <a href="intro_video.html" target="_blank" class="l-btn-secondary" style="border-color:#FF9F1C;color:#FFB37C;background:rgba(255,159,28,0.12)">
+        <a href="intro_video.html" target="_blank" class="l-btn-secondary" style="border-color:#FF9F1C;color:#FFB37C;background:rgba(255,159,28,0.14)">
           <span>🎬 Watch 3D Intro (1080p)</span>
         </a>
         <a href="#features" class="l-btn-secondary">
@@ -1266,13 +1249,13 @@ function md(src) {
   };
 
   for (const raw of src.split("\n")) {
-    const x = raw.trimEnd();
-    if (/^\s*\|/.test(x)) { cl(); t.push(x); continue; } else ft();
-    if (/^#{1,4}\s/.test(x)) { cl(); o += "<h2>" + inl(x.replace(/^#{1,4}\s/, "")) + "</h2>"; }
-    else if (/^\s*[-*•]\s+/.test(x)) { if (!l) { o += "<ul>"; l = true; } o += "<li>" + inl(x.replace(/^\s*[-*•]\s+/, "")) + "</li>"; }
-    else if (/^\s*-{3,}\s*$/.test(x)) { cl(); o += "<hr>"; }
-    else if (!x.trim()) cl();
-    else { cl(); o += "<p>" + inl(x) + "</p>"; }
+    const line = raw.trimEnd();
+    if (/^\s*\|/.test(line)) { cl(); t.push(x); continue; } else ft();
+    if (/^#{1,4}\s/.test(line)) { cl(); o += "<h2>" + inl(line.replace(/^#{1,4}\s/, "")) + "</h2>"; }
+    else if (/^\s*[-*•]\s+/.test(line)) { if (!l) { o += "<ul>"; l = true; } o += "<li>" + inl(line.replace(/^\s*[-*•]\s+/,"")) + "</li>"; }
+    else if (/^\s*-{3,}\s*$/.test(line)) { cl(); o += "<hr>"; }
+    else if (!line.trim()) cl();
+    else { cl(); o += "<p>" + inl(line) + "</p>"; }
   }
   cl(); ft(); return o;
 }
@@ -1685,6 +1668,120 @@ $("aGo").onclick = async () => {
   $("authDlg").close();
 };
 
+// ==========================================================================
+// LIVE THREE.JS 3D HERO ANIMATION WORLD
+// ==========================================================================
+(function init3DHero() {
+  const c = $("hero3DCanvas");
+  if (!c || !window.THREE) return;
+  const renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(c.clientWidth || innerWidth, c.clientHeight || innerHeight);
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x09061A, 0.025);
+
+  const camera = new THREE.PerspectiveCamera(45, (c.clientWidth || innerWidth) / (c.clientHeight || innerHeight), 0.1, 100);
+  camera.position.set(0, 1.8, 11);
+
+  // Lights
+  const amb = new THREE.AmbientLight(0x4A3780, 1.8);
+  scene.add(amb);
+  const dir = new THREE.DirectionalLight(0xFFE2A0, 3.0);
+  dir.position.set(8, 14, 10);
+  scene.add(dir);
+  const rimP = new THREE.PointLight(0x7C6CFF, 4.0, 30);
+  rimP.position.set(-8, 4, -6);
+  scene.add(rimP);
+  const rimO = new THREE.PointLight(0xFF9F1C, 5.0, 30);
+  rimO.position.set(8, 2, -2);
+  scene.add(rimO);
+
+  // Stardust Particles
+  const pCount = 900;
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(pCount * 3);
+  const pCols = new Float32Array(pCount * 3);
+  const palette = [new THREE.Color(0xFFD166), new THREE.Color(0xFF9F1C), new THREE.Color(0xCBB8FF), new THREE.Color(0xFFFFFF)];
+  for (let i = 0; i < pCount; i++) {
+    pPos[i*3] = (Math.random() - 0.5) * 40;
+    pPos[i*3+1] = (Math.random() - 0.5) * 24;
+    pPos[i*3+2] = (Math.random() - 0.5) * 40;
+    const col = palette[Math.floor(Math.random() * palette.length)];
+    pCols[i*3] = col.r; pCols[i*3+1] = col.g; pCols[i*3+2] = col.b;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  pGeo.setAttribute('color', new THREE.BufferAttribute(pCols, 3));
+  const pMat = new THREE.PointsMaterial({ size: 0.15, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
+  const pSys = new THREE.Points(pGeo, pMat);
+  scene.add(pSys);
+
+  // Floating 3D Books
+  const books = [];
+  const bColors = [0x3A1F6E, 0xD9658A, 0x1D1348, 0xE07B00, 0x6C5CFF, 0x0E9F8E];
+  for (let i = 0; i < 7; i++) {
+    const bg = new THREE.Group();
+    const cover = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.14, 2.7), new THREE.MeshStandardMaterial({ color: bColors[i % bColors.length], roughness: 0.4 }));
+    const pages = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.36, 2.5), new THREE.MeshStandardMaterial({ color: 0xFFF7E8, roughness: 0.8 }));
+    pages.position.set(0.06, 0, 0);
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.4, 2.72), new THREE.MeshStandardMaterial({ color: 0xFFD166, metalness: 0.8, roughness: 0.2 }));
+    rib.position.set(-0.95, 0, 0);
+    bg.add(cover, pages, rib);
+    bg.position.set((Math.random() - 0.5) * 14 + (i > 3 ? 4 : -4), (Math.random() - 0.5) * 5 + 1.2, (Math.random() - 0.5) * 12 - 2);
+    bg.rotation.set(Math.random() * 0.6, Math.random() * Math.PI, Math.random() * 0.4);
+    bg.scale.setScalar(0.75 + Math.random() * 0.35);
+    scene.add(bg);
+    books.push({ m: bg, rx: 0.003 + Math.random()*0.003, ry: 0.004 + Math.random()*0.004, fy: bg.position.y, sp: 0.8 + Math.random()*0.8 });
+  }
+
+  // Winding 3D Glowing Path
+  const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-6, -1.8, 8),
+    new THREE.Vector3(-2, -1.5, 3),
+    new THREE.Vector3(2.5, -1.2, -3),
+    new THREE.Vector3(0, -0.8, -10),
+    new THREE.Vector3(4, -0.4, -18)
+  ]);
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.5, 8, false), new THREE.MeshStandardMaterial({ color: 0xFFB37C, emissive: 0xFF9F1C, emissiveIntensity: 0.6, roughness: 0.2, metalness: 0.6 }));
+  scene.add(tube);
+
+  // Parallax interaction with Mouse
+  let mouseX = 0, mouseY = 0;
+  window.addEventListener("mousemove", (e) => {
+    mouseX = (e.clientX / innerWidth - 0.5) * 1.5;
+    mouseY = (e.clientY / innerHeight - 0.5) * 1.2;
+  });
+
+  function resize() {
+    if (!c) return;
+    const w = c.clientWidth || innerWidth;
+    const h = c.clientHeight || innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  window.addEventListener("resize", resize);
+
+  let clock = 0;
+  function animate3D() {
+    requestAnimationFrame(animate3D);
+    if (document.body.classList.contains("inchat") || scrollY > innerHeight * 1.5) return; // save GPU
+    clock += 0.016;
+    pSys.rotation.y = clock * 0.03;
+    books.forEach((b, idx) => {
+      b.m.rotation.x += b.rx;
+      b.m.rotation.y += b.ry;
+      b.m.position.y = b.fy + Math.sin(clock * b.sp + idx) * 0.25;
+    });
+    camera.position.x += (mouseX - camera.position.x) * 0.03;
+    camera.position.y += (1.8 - mouseY - camera.position.y) * 0.03;
+    camera.lookAt(0, 1.0, -4);
+    renderer.render(scene, camera);
+  }
+  animate3D();
+})();
+
+// App initial state
 drawChips();
 drawHist();
 place(true);
