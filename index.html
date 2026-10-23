@@ -4,859 +4,214 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BigBrainn’t: let the AI do the thinking</title>
-<meta name="description" content="Meet your AI study buddy that turns 'I'm cooked' into 'Wait, I actually get it.' Exam game plans, homework help, and concepts taught your way.">
-<meta name="theme-color" content="#09061A">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#F6F4FF">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700;1,800;1,900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Playfair+Display:wght@800;900&display=swap" rel="stylesheet">
 <style>
-/* ==========================================================================
-   DESIGN TOKENS & RESET
-   ========================================================================== */
-:root {
-  --bg: #F6F4FF;
-  --panel: #FFFFFF;
-  --card: #FFFFFF;
-  --line: #E4E0F7;
-  --ink: #1B1740;
-  --muted: #6B6890;
-  --v: #6C5CFF;
-  --a: #FF9F1C;
-  --font: "Bricolage Grotesque", system-ui, -apple-system, sans-serif;
-  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
-  --mono: "JetBrains Mono", monospace;
+:root{color-scheme:light;--bg:#F6F4FF;--panel:#FFFFFF;--card:#FFFFFF;--line:#E4E0F7;--ink:#1B1740;--muted:#6B6890;--v:#6C5CFF;--a:#FF9F1C;--font:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 var(--font)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(60% 45% at 50% -5%,#8E7BFF55,transparent 70%),radial-gradient(40% 30% at 85% 0,#5BC8FF44,transparent 70%),radial-gradient(35% 25% at 10% 5%,#FFB6D955,transparent 70%)}
+.app{position:relative;display:grid;grid-template-columns:270px 1fr;min-height:100vh;min-height:100dvh}
+#side{background:var(--panel);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:10px;position:sticky;top:0;height:100vh;height:100dvh;align-self:start}
+.brand{font-weight:800;font-size:22px;letter-spacing:-.02em;padding:2px 8px 8px;display:flex;align-items:center;gap:8px}
+.brand i{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE28A,var(--a) 55%,var(--v))}
+.btn{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left}
+.btn:hover{border-color:var(--v)}
+#hist{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.hl{color:var(--muted);font-size:13px;padding:8px 8px 2px}
+.hi{font:inherit;font-size:15px;color:var(--ink);background:transparent;border:0;border-radius:10px;padding:8px 10px;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi:hover{background:#F0EDFF}
+.main{display:flex;flex-direction:column;min-width:0;min-height:100vh;min-height:100dvh}
+#menu{display:none;position:fixed;top:10px;left:10px;z-index:15}
+#stage{flex:1;padding:0 18px 12px}
+#dockSlot{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 22%)}
+.col{max-width:760px;margin:0 auto}
+#empty{padding-top:9vh;text-align:center}
+.orb{width:96px;height:96px;margin:0 auto 22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff9,transparent 38%),radial-gradient(circle,#FFD65A 0,#FF9F1C 42%,#6A3FFF 100%);box-shadow:0 0 0 7px #ffffffaa,0 0 60px #8E7BFF88,0 0 110px #FFB02055;animation:b 5s ease-in-out infinite}
+@keyframes b{50%{transform:scale(1.06)}}
+h1{font-size:clamp(30px,5vw,50px);line-height:1.05;font-weight:800;letter-spacing:-.03em;margin:0 0 10px}
+.intro{color:var(--muted);margin:0 auto 26px;max-width:560px}
+#dock{max-width:760px;margin:0 auto;width:100%;text-align:left}
+.comp{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:12px 12px 10px}
+.comp:focus-within{border-color:var(--v)}
+#q{width:100%;background:transparent;border:0;color:var(--ink);font:inherit;resize:none;outline:none;max-height:160px;padding:4px 6px}
+.crow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.lab{color:var(--muted);font-size:14px;margin-right:2px}
+.chip{font:inherit;font-size:14px;border:1.2px solid var(--line);background:transparent;color:var(--ink);padding:4px 11px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:#7C6CFF33;border-color:var(--v);font-weight:600}
+#interest{font:inherit;font-size:14px;color:var(--ink);background:transparent;border:1.2px dashed var(--line);border-radius:999px;padding:4px 11px;width:150px}
+#send{margin-left:auto;width:42px;height:42px;border-radius:50%;border:0;background:var(--a);color:#1a1200;font-size:20px;font-weight:800;cursor:pointer}
+#send:disabled{opacity:.5}
+:focus-visible{outline:3px solid var(--v);outline-offset:2px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.card{font:inherit;color:var(--ink);text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:16px;cursor:pointer;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px)}
+.card b{display:block;font-size:20px;font-weight:800;letter-spacing:-.01em}
+.card span{color:var(--muted);font-size:15px;line-height:1.35;display:block;margin-top:2px}
+.comp{box-shadow:0 8px 30px #6C5CFF18}.card{box-shadow:0 4px 16px #6C5CFF10}.card b{font-size:18px}.card{display:flex;flex-direction:column;justify-content:flex-start}
+.c3 b{color:#0E9F8E}.c3:hover{border-color:#0E9F8E}
+.ld{display:flex;align-items:center;gap:14px;padding:16px 4px;color:var(--muted)}
+.ld .o{flex:none;width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff9,transparent 38%),radial-gradient(circle,#FFD65A 0,#FF9F1C 42%,#6A3FFF 100%);box-shadow:0 0 24px #8E7BFF88;animation:b 1.3s ease-in-out infinite}
+.ld .lm{font-weight:600;transition:opacity .25s,transform .25s}.ld .lm.sw{opacity:0;transform:translateY(5px)}
+.c1:hover{border-color:var(--a)}.c1 b{color:#E07B00}
+.c2:hover{border-color:var(--v)}.c2 b{color:#6C5CFF}
+.chat #dock{padding:8px 18px 14px}
+.chat .cards{display:none}
+.chat .intro-only{display:none}
+.u{display:flex;gap:10px;margin:22px 0 10px;align-items:flex-start}
+.av{color:#fff;flex:none;width:30px;height:30px;border-radius:50%;background:var(--v);display:grid;place-items:center;font-size:14px;font-weight:800}
+.av.b{background:radial-gradient(circle at 35% 30%,#FFE28A,var(--a) 60%,var(--v))}
+.u p{margin:3px 0 0;font-weight:600}
+.answer{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:4px 20px 18px;margin-bottom:8px}
+.answer h2{font-size:21px;margin:22px 0 6px;font-weight:800}
+.answer p{margin:8px 0}.answer ul{padding-left:20px;margin:6px 0}
+.tw{overflow-x:auto;margin:8px 0}
+table{border-collapse:collapse;min-width:100%;font-size:15px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#7C6CFF22}
+.tag{font-weight:800;border-radius:8px;padding:2px 9px;font-size:14px;white-space:nowrap}
+.t-must{background:#FFE1DA;color:#B3361A}.t-should{background:#FFF0C7;color:#7A5200}.t-skip{background:#ECEAF7;color:#6B6890}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.tools{display:flex;gap:8px;margin-top:14px}
+.tools button{font:inherit;font-size:14px;border:1.2px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:6px 11px;cursor:pointer}
+.muted{color:var(--muted)}.err{color:#D6303A;font-weight:600}
+.pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--a);margin-right:8px;animation:b 1s ease-in-out infinite}
+.note{color:var(--muted);font-size:13px;text-align:center;margin:8px 0 0}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:22px;width:min(480px,92vw);max-height:90vh}
+dialog::backdrop{background:#1b174088}
+dialog h2{margin:0 0 4px;font-size:25px;font-weight:800;letter-spacing:-.02em}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tb{font:inherit;font-size:18px;border:1.2px solid var(--line);background:transparent;border-radius:999px;padding:2px 10px;cursor:pointer;color:var(--ink)}
+#lang{width:auto;padding:4px 8px;font-size:14px;border-radius:999px;border-width:1.2px}
+.pvi{position:relative;display:inline-block;margin:2px 6px 8px}
+.pvi img{max-height:90px;border-radius:12px;display:block}
+.pvi button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--a);color:#1a1200;font-weight:800;cursor:pointer}
+.uimg{max-height:130px;max-width:100%;border-radius:12px;margin-top:8px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.acts{display:flex;gap:8px;margin-top:18px}
+.acts .go{flex:1;font:inherit;font-weight:800;font-size:17px;border:0;border-radius:13px;padding:13px;background:var(--a);color:#1a1200;cursor:pointer}
+@media (max-width:860px){
+ .app{grid-template-columns:1fr}
+ #side{position:fixed;inset:0 auto 0 0;width:280px;z-index:20;transform:translateX(-102%);transition:transform .2s}
+ #side.open{transform:none}
+ #menu{display:block}.cards{grid-template-columns:1fr}#empty{padding-top:3vh}#stage{padding-top:54px}
 }
+@media (prefers-reduced-motion:reduce){.orb,.pulse,.ld .o{animation:none}#side,.card{transition:none}}
+@media print{body{background:#fff;color:#000}body::before,#side,header,#dock,.tools,.note{display:none}.app,.main,#stage{display:block;height:auto;min-height:0}.answer{border:0;background:#fff;color:#000}th,td{border-color:#999}}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font: 17px/1.5 var(--font);
-  overflow-x: hidden;
-}
-
-/* ==========================================================================
-   3D HERO CINEMATIC VIDEO SECTION (#hero3DSection)
-   ========================================================================== */
-#hero3DSection {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 640px;
-  background: #09061A;
-  overflow: hidden;
-  user-select: none;
-}
-
-#webglHeroCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  z-index: 1;
-}
-
-/* Atmospheric Gradients & Vignette */
-.hero-vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: 
-    radial-gradient(circle at 50% 50%, transparent 45%, rgba(9, 6, 26, 0.75) 100%),
-    linear-gradient(180deg, rgba(9, 6, 26, 0.5) 0%, transparent 20%, transparent 80%, rgba(9, 6, 26, 0.95) 100%);
-}
-
-/* Minimal Sticky Navigation over 3D Hero */
-.l-nav {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  padding: 16px 24px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.l-nav-inner {
-  pointer-events: auto;
-  width: 100%;
-  max-width: 1140px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(19, 14, 56, 0.75);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  padding: 8px 16px 8px 22px;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
-}
-
-.l-brand {
-  font-weight: 800;
-  font-size: 21px;
-  letter-spacing: -0.02em;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.l-brand i {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #FFE28A, #FF9F1C 55%, #6C5CFF);
-}
-
-.scene-nav-pills {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.scene-pill {
-  color: #CBB8FF;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.scene-pill:hover, .scene-pill.active {
-  color: #fff;
-  background: #6C5CFF;
-  border-color: #6C5CFF;
-}
-
-.l-cta {
-  background: linear-gradient(135deg, #FFF, #FFE2C7);
-  color: #140E38;
-  font-size: 14px;
-  font-weight: 800;
-  padding: 9px 20px;
-  border-radius: 999px;
-  border: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.l-cta:hover { transform: translateY(-1.5px); box-shadow: 0 6px 20px rgba(255, 159, 28, 0.45); }
-
-/* Cinematic Typography Stages on top of 3D Scene */
-.stage-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.scene-text-block {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 6% 9%;
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: none;
-}
-
-.scene-text-block.active {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Scene 1 Typography */
-.scene1-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(124, 108, 255, 0.2);
-  border: 1px solid rgba(203, 184, 255, 0.35);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-family: var(--mono);
-  font-size: clamp(11px, 1.2vw, 14px);
-  font-weight: 700;
-  color: #FFD166;
-  margin-bottom: 20px;
-  width: fit-content;
-}
-
-.scene1-heading {
-  font-family: var(--serif);
-  font-size: clamp(40px, 5.8vw, 82px);
-  font-weight: 900;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-  color: #FFFFFF;
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
-  max-width: 860px;
-}
-.scene1-heading span { display: block; }
-.scene1-heading .italic-highlight {
-  font-style: italic;
-  font-weight: 700;
-  background: linear-gradient(120deg, #FF9F1C, #FFB37C, #FFE28A);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Feature Scenes Typography (Scenes 2, 3, 4) */
-.feature-badge-pill {
-  font-family: var(--mono);
-  font-size: clamp(13px, 1.4vw, 18px);
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #FF9F1C;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.badge-pill-cyan { color: #2EC4B6; }
-.badge-pill-purple { color: #CBB8FF; }
-
-.feature-heading-serif {
-  font-family: var(--serif);
-  font-size: clamp(34px, 4.6vw, 66px);
-  font-weight: 900;
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  color: #FFFFFF;
-  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
-  max-width: 800px;
-}
-
-/* Scene 5 Product Transition Typography */
-.scene5-center-wrap {
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-}
-
-.scene5-title {
-  font-family: var(--serif);
-  font-size: clamp(36px, 5vw, 72px);
-  font-weight: 900;
-  color: #FFFFFF;
-  line-height: 1.1;
-  margin-bottom: 24px;
-  text-shadow: 0 4px 35px rgba(0, 0, 0, 0.9);
-}
-
-.scene5-cta-button {
-  pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #FF9F1C 0%, #FF7A45 100%);
-  color: #120A00;
-  font-family: var(--sans);
-  font-size: clamp(16px, 1.8vw, 22px);
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  padding: 16px 38px;
-  border-radius: 999px;
-  box-shadow: 0 10px 40px rgba(255, 159, 28, 0.5), 0 0 30px rgba(255, 122, 69, 0.4);
-  border: 0;
-  cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.scene5-cta-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 14px 50px rgba(255, 159, 28, 0.7);
-}
-
-/* 3D Video HUD Control Bar */
-.hero-hud {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  padding: 14px 24px;
-  background: linear-gradient(0deg, rgba(4, 2, 12, 0.95) 0%, rgba(4, 2, 12, 0.5) 60%, transparent 100%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.hud-timeline-track {
-  position: relative;
-  width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.hud-timeline-progress {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #FF9F1C, #2EC4B6);
-  border-radius: 999px;
-}
-
-.hud-actions-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.hud-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #FFF;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-}
-.hud-btn:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFF; }
-
-.hud-timestamp {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: #CBB8FF;
-}
-
-/* ==========================================================================
-   THE ORIGINAL AI STUDY TOOL DASHBOARD (.app)
-   ========================================================================== */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: 
-    radial-gradient(60% 45% at 50% -5%, #8E7BFF55, transparent 70%),
-    radial-gradient(40% 30% at 85% 0, #5BC8FF44, transparent 70%),
-    radial-gradient(35% 25% at 10% 5%, #FFB6D955, transparent 70%);
-  z-index: 0;
-}
-
-.app {
-  position: relative;
-  display: grid;
-  grid-template-columns: 270px 1fr;
-  min-height: 100vh;
-  min-height: 100dvh;
-  z-index: 2;
-  background: var(--bg);
-}
-
-#side {
-  background: var(--panel);
-  border-right: 1px solid var(--line);
-  padding: 16px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
-  align-self: start;
-}
-
-.brand {
-  font-weight: 800;
-  font-size: 22px;
-  letter-spacing: -0.02em;
-  padding: 2px 8px 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ink);
-}
-.brand i {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #FFE28A, var(--a) 55%, var(--v));
-}
-
-.btn {
-  font: inherit;
-  color: var(--ink);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
-}
-.btn:hover { border-color: var(--v); background: #FAF8FF; }
-
-#hist {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.hl { color: var(--muted); font-size: 13px; padding: 8px 8px 2px; }
-.hi {
-  font: inherit;
-  font-size: 15px;
-  color: var(--ink);
-  background: transparent;
-  border: 0;
-  border-radius: 10px;
-  padding: 8px 10px;
-  text-align: left;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: background 0.15s ease;
-}
-.hi:hover { background: #F0EDFF; }
-
-.main {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-#menu { display: none; position: fixed; top: 10px; left: 10px; z-index: 30; }
-#stage { flex: 1; padding: 0 18px 12px; }
-#dockSlot { position: sticky; bottom: 0; background: linear-gradient(transparent, var(--bg) 22%); z-index: 5; }
-.col { max-width: 760px; margin: 0 auto; }
-#empty { padding-top: 7vh; text-align: center; }
-
-/* Glowing Orb */
-.orb {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #fff9, transparent 38%), radial-gradient(circle, #FFD65A 0, #FF9F1C 42%, #6A3FFF 100%);
-  box-shadow: 0 0 0 7px #ffffffaa, 0 0 60px #8E7BFF88, 0 0 110px #FFB02055;
-  animation: b 5s ease-in-out infinite;
-}
-@keyframes b { 50% { transform: scale(1.06); } }
-
-/* BIG, PROFESSIONAL EDITORIAL CURSIVE HEADLINE */
-#empty h1 {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 800;
-  font-size: clamp(44px, 6.8vw, 76px);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  margin: 0 auto 16px;
-  max-width: 680px;
-  text-shadow: 0 4px 24px rgba(108, 92, 255, 0.12);
-}
-
-.intro { color: var(--muted); margin: 0 auto 26px; max-width: 560px; font-size: 16.5px; }
-#dock { max-width: 760px; margin: 0 auto; width: 100%; text-align: left; }
-.comp {
-  background: var(--card);
-  border: 1.5px solid var(--line);
-  border-radius: 22px;
-  padding: 12px 12px 10px;
-  box-shadow: 0 8px 30px #6C5CFF18;
-  transition: border-color 0.2s ease;
-}
-.comp:focus-within { border-color: var(--v); }
-
-#q {
-  width: 100%;
-  background: transparent;
-  border: 0;
-  color: var(--ink);
-  font: inherit;
-  resize: none;
-  outline: none;
-  max-height: 160px;
-  padding: 4px 6px;
-}
-
-.crow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
-.lab { color: var(--muted); font-size: 14px; margin-right: 2px; }
-.chip {
-  font: inherit;
-  font-size: 14px;
-  border: 1.2px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  padding: 4px 11px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.chip[aria-pressed="true"] { background: #7C6CFF33; border-color: var(--v); font-weight: 600; }
-#interest {
-  font: inherit;
-  font-size: 14px;
-  color: var(--ink);
-  background: transparent;
-  border: 1.2px dashed var(--line);
-  border-radius: 999px;
-  padding: 4px 11px;
-  width: 150px;
-}
-
-#send {
-  margin-left: auto;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 0;
-  background: var(--a);
-  color: #1a1200;
-  font-size: 20px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-#send:hover { transform: scale(1.06); }
-#send:disabled { opacity: 0.5; cursor: not-allowed; }
-
-:focus-visible { outline: 3px solid var(--v); outline-offset: 2px; }
-
-/* The 3 Cards */
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
-.card {
-  font: inherit;
-  color: var(--ink);
-  text-align: left;
-  background: var(--card);
-  border: 1.5px solid var(--line);
-  border-radius: 18px;
-  padding: 16px;
-  cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s;
-  box-shadow: 0 4px 16px #6C5CFF10;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-.card:hover { transform: translateY(-2px); }
-.card b { display: block; font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
-.card span { color: var(--muted); font-size: 14.5px; line-height: 1.35; display: block; margin-top: 2px; }
-
-.c1:hover { border-color: var(--a); }
-.c1 b { color: #E07B00; }
-.c2:hover { border-color: var(--v); }
-.c2 b { color: #6C5CFF; }
-.c3:hover { border-color: #0E9F8E; }
-.c3 b { color: #0E9F8E; }
-
-/* Chat States */
-.chat #dock { padding: 8px 18px 14px; }
-.chat .cards { display: none; }
-.chat .intro-only { display: none; }
-
-.u { display: flex; gap: 10px; margin: 22px 0 10px; align-items: flex-start; }
-.av {
-  color: #fff;
-  flex: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--v);
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 800;
-}
-.av.b { background: radial-gradient(circle at 35% 30%, #FFE28A, var(--a) 60%, var(--v)); }
-.u p { margin: 3px 0 0; font-weight: 600; }
-
-.answer {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 4px 20px 18px;
-  margin-bottom: 8px;
-  box-shadow: 0 4px 18px rgba(108, 92, 255, 0.08);
-}
-.answer h2 { font-size: 21px; margin: 22px 0 6px; font-weight: 800; color: var(--ink); }
-.answer p { margin: 8px 0; }
-.answer ul { padding-left: 20px; margin: 6px 0; }
-
-.ld { display: flex; align-items: center; gap: 14px; padding: 16px 4px; color: var(--muted); }
-.ld .o {
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #fff9, transparent 38%), radial-gradient(circle, #FFD65A 0, #FF9F1C 42%, #6A3FFF 100%);
-  box-shadow: 0 0 24px #8E7BFF88;
-  animation: b 1.3s ease-in-out infinite;
-}
-.ld .lm { font-weight: 600; transition: opacity 0.25s, transform 0.25s; }
-.ld .lm.sw { opacity: 0; transform: translateY(5px); }
-
-.tw { overflow-x: auto; margin: 8px 0; }
-table { border-collapse: collapse; min-width: 100%; font-size: 15px; }
-th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
-th { background: #7C6CFF22; }
-.tag { font-weight: 800; border-radius: 8px; padding: 2px 9px; font-size: 14px; white-space: nowrap; }
-.t-must { background: #FFE1DA; color: #B3361A; }
-.t-should { background: #FFF0C7; color: #7A5200; }
-.t-skip { background: #ECEAF7; color: #6B6890; }
-
-hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
-.tools { display: flex; gap: 8px; margin-top: 14px; }
-.tools button {
-  font: inherit;
-  font-size: 14px;
-  border: 1.2px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  border-radius: 10px;
-  padding: 6px 11px;
-  cursor: pointer;
-}
-.tools button:hover { border-color: var(--v); }
-
-.muted { color: var(--muted); }
-.err { color: #D6303A; font-weight: 600; }
-.pulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--a); margin-right: 8px; animation: b 1s ease-in-out infinite; }
-.note { color: var(--muted); font-size: 13px; text-align: center; margin: 8px 0 0; }
-
-/* Dialogs */
-dialog {
-  background: var(--panel);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  padding: 22px;
-  width: min(480px, 92vw);
-  max-height: 90vh;
-  box-shadow: 0 20px 60px rgba(27, 23, 64, 0.35);
-  margin: auto;
-}
-dialog::backdrop { background: #1b174088; backdrop-filter: blur(4px); }
-dialog h2 { margin: 0 0 4px; font-size: 25px; font-weight: 800; letter-spacing: -0.02em; }
-label { display: block; font-weight: 600; margin: 14px 0 6px; }
-input, select, textarea {
-  width: 100%;
-  font: inherit;
-  color: var(--ink);
-  background: var(--bg);
-  border: 1.5px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
-}
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tb {
-  font: inherit;
-  font-size: 18px;
-  border: 1.2px solid var(--line);
-  background: transparent;
-  border-radius: 999px;
-  padding: 2px 10px;
-  cursor: pointer;
-  color: var(--ink);
-}
-#lang { width: auto; padding: 4px 8px; font-size: 14px; border-radius: 999px; border-width: 1.2px; }
-.pvi { position: relative; display: inline-block; margin: 2px 6px 8px; }
-.pvi img { max-height: 90px; border-radius: 12px; display: block; }
-.pvi button {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 0;
-  background: var(--a);
-  color: #1a1200;
-  font-weight: 800;
-  cursor: pointer;
-}
-.uimg { max-height: 130px; max-width: 100%; border-radius: 12px; margin-top: 8px; display: block; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.acts { display: flex; gap: 8px; margin-top: 18px; }
-.acts .go {
-  flex: 1;
-  font: inherit;
-  font-weight: 800;
-  font-size: 17px;
-  border: 0;
-  border-radius: 13px;
-  padding: 13px;
-  background: var(--a);
-  color: #1a1200;
-  cursor: pointer;
-}
-
-@media (max-width: 860px) {
-  .app { grid-template-columns: 1fr; }
-  #side { position: fixed; inset: 0 auto 0 0; width: 280px; z-index: 40; transform: translateX(-102%); transition: transform 0.2s; }
-  #side.open { transform: none; }
-  #menu { display: block; }
-  .cards { grid-template-columns: 1fr; }
-  #empty { padding-top: 4vh; }
-  #stage { padding-top: 54px; }
-  .scene-nav-pills { display: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .orb, .pulse, .ld .o { animation: none; }
-  #side, .card { transition: none; transform: none; }
-}
-@media print {
-  body { background: #fff; color: #000; }
-  body::before, #side, header, #dock, .tools, .note, #hero3DSection { display: none; }
-  .app, .main, #stage { display: block; height: auto; min-height: 0; }
-  .answer { border: 0; background: #fff; color: #000; }
-  th, td { border-color: #999; }
-}
+/* ---------- landing ---------- */
+#landing{position:relative;z-index:1;background:#1B1456}
+.inchat #landing{display:none}
+body:not(.attool):not(.inchat) #menu{display:none!important}
+.hero{position:relative;min-height:100vh;min-height:100dvh;overflow:hidden;color:#fff;display:flex;align-items:flex-end}
+.scene{position:absolute;inset:0;width:100%;height:100%}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#1B1456d9 0,#1B145600 58%),linear-gradient(0deg,#1B145699,transparent 45%)}
+.lnav{position:absolute;z-index:3;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:22px clamp(18px,4vw,48px)}
+.lbrand{font-weight:800;font-size:22px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.lbrand i{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE28A,#FF9F1C 55%,#6C5CFF)}
+.llinks{display:flex;gap:6px;align-items:center}
+.llinks button{font:inherit;font-size:15px;color:#fff;background:none;border:0;padding:8px 14px;cursor:pointer;opacity:.92}
+.llinks button:hover{opacity:1;text-decoration:underline;text-underline-offset:4px}
+.llinks .lbox{border:1px solid #ffffffcc;padding:10px 20px;border-radius:2px}
+.hcopy{position:relative;z-index:2;padding:0 clamp(18px,4vw,48px) clamp(34px,8vh,80px);width:100%}
+.eyebrow{display:flex;align-items:center;gap:10px;margin:0 0 6px;color:#CBB8FF;font-size:clamp(14px,1.6vw,17px)}
+.bars{display:inline-flex;gap:3px;align-items:flex-end;height:20px}.bars b{width:5px;background:#9C8BFF;border-radius:1px}.bars b:nth-child(1){height:12px}.bars b:nth-child(2){height:20px}.bars b:nth-child(3){height:15px}
+.big{font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-weight:900;font-size:clamp(40px,9.5vw,140px);line-height:1;white-space:nowrap;letter-spacing:-.02em;text-shadow:0 4px 30px #1B145655;margin:0 0 14px}
+.hp{max-width:500px;margin:0 0 16px;font-size:clamp(14px,1.5vw,16px);line-height:1.5;color:#F3ECFF}
+.hf{list-style:none;padding:0;margin:0 0 22px;max-width:520px;display:grid;gap:10px}
+.hf li{display:flex;gap:12px;align-items:flex-start;font-size:clamp(14px,1.5vw,16px);line-height:1.45;color:#F3ECFF}
+.hf li>span{font-size:20px;line-height:1.3}.hf b{color:#fff}
+.nf{margin:12px 0 0;font-size:14px;color:#D9CCFF}
+.cta{font:inherit;font-weight:600;background:#fff;color:#1B1456;border:0;border-radius:3px;padding:13px 22px;cursor:pointer;display:inline-flex;gap:14px;align-items:center}
+.cta:hover{background:#FFE9C4}
+.lp2,.lp3{position:relative}
+.lp2{color:#fff;background:linear-gradient(#1B1456,#2A1A6E);padding:clamp(60px,12vh,120px) clamp(18px,4vw,48px)}
+.lp3{background:linear-gradient(#2A1A6E 0,#6A3B9E 50%,#F6F4FF 100%);padding:clamp(70px,14vh,130px) clamp(18px,4vw,48px) clamp(120px,22vh,220px);text-align:center;color:#fff}
+.lw{max-width:1040px;margin:0 auto}
+.serif{font-family:"Playfair Display",Georgia,serif;font-weight:800;font-size:clamp(30px,5.5vw,60px);line-height:1.05;margin:0 0 28px;letter-spacing:-.01em}
+.lp3 p{font-size:clamp(17px,2.2vw,22px);margin:0 0 26px;color:#F3ECFF}
+.lcards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.lc{font:inherit;color:#fff;text-align:left;background:#ffffff14;border:1px solid #ffffff33;border-radius:18px;padding:22px;cursor:pointer;display:flex;flex-direction:column;gap:8px;backdrop-filter:blur(6px)}
+.lc:hover{background:#ffffff22;border-color:#FFB86B}
+.lc .le{font-size:30px}.lc b{font-size:21px;font-weight:800}.lc span:not(.le){color:#DCD2FF;font-size:15.5px;line-height:1.45}.lc em{font-style:normal;color:#FFC27A;font-weight:600;margin-top:6px}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}.rv.in{opacity:1;transform:none}
+.cl{animation:cl 38s ease-in-out infinite alternate}.cl.b{animation-duration:52s}
+@keyframes cl{from{transform:translateX(-70px)}to{transform:translateX(70px)}}
+.birds{animation:bd 16s ease-in-out infinite alternate}
+@keyframes bd{from{transform:translate(-50px,8px)}to{transform:translate(60px,-14px)}}
+.bd{transform-box:fill-box;transform-origin:50% 100%;animation:fl .9s ease-in-out infinite alternate}
+@keyframes fl{from{opacity:1}to{opacity:.75}}
+.gr{transform-box:fill-box;transform-origin:50% 100%;animation:sw 5.5s ease-in-out infinite alternate}.g2{animation-duration:4.2s;animation-direction:alternate-reverse}
+@keyframes sw{from{transform:skewX(-1.6deg)}to{transform:skewX(1.6deg)}}
+.scarf{transform-box:fill-box;transform-origin:0 50%;animation:sc 1.5s ease-in-out infinite alternate}
+@keyframes sc{from{transform:rotate(-4deg) skewY(-3deg)}to{transform:rotate(5deg) skewY(4deg)}}
+@media (max-width:860px){.hero{display:block;min-height:0}.hero::before{content:"";position:absolute;left:0;right:0;top:calc(max(54vh,300px) - 70px);height:70px;background:linear-gradient(transparent,#1B1456);z-index:1;pointer-events:none}.scene{position:relative;display:block;height:54vh;min-height:300px}.big{font-size:12.5vw}.hcopy{padding-top:8px}.llinks button:not(.lbox){display:none}.lcards{grid-template-columns:1fr}.hero::after{display:none}}
+@media (prefers-reduced-motion:reduce){.cl,.birds,.bd,.gr,.scarf{animation:none}.rv{opacity:1;transform:none;transition:none}}
+@media print{#landing{display:none}}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
-
-<!-- ==========================================================================
-     SCENE 1 TO 5: 3D ANIMATED VIDEO RUNS RIGHT IN THE HERO SECTION
-     ========================================================================== -->
-<section id="hero3DSection">
-  <!-- Full-Screen 3D WebGL Canvas -->
-  <canvas id="webglHeroCanvas"></canvas>
-  <div class="hero-vignette"></div>
-
-  <!-- Minimal Sticky Navigation -->
-  <header class="l-nav">
-    <div class="l-nav-inner">
-      <div class="l-brand"><i></i><span>BigBrainn’t</span></div>
-      
-      <div class="scene-nav-pills">
-        <button type="button" class="scene-pill active" data-jump="0">01 Opening</button>
-        <button type="button" class="scene-pill" data-jump="5">02 Exam Plan</button>
-        <button type="button" class="scene-pill" data-jump="10">03 Homework</button>
-        <button type="button" class="scene-pill" data-jump="15">04 Teach Me</button>
-        <button type="button" class="scene-pill" data-jump="20">05 App Zoom</button>
-      </div>
-
-      <button type="button" class="l-cta" id="btnSkipToApp">Enter Study Space →</button>
-    </div>
-  </header>
-
-  <!-- Typography Overlays Synchronized to 3D Camera -->
-  <div class="stage-overlay">
-    <!-- Scene 1: Opening (0s - 5s) -->
-    <div class="scene-text-block active" id="textScene1">
-      <div class="scene1-badge">
-        <span>✨</span>
-        <span>YOUR ACADEMIC COMEBACK STARTS HERE</span>
-      </div>
-      <h1 class="scene1-heading">
-        <span>School is hard enough.</span>
-        <span class="italic-highlight">Learning shouldn't be.</span>
-      </h1>
-      <p style="color:#EDE8FF;font-size:clamp(16px, 1.8vw, 20px);margin:14px 0 22px;max-width:540px;">
-        Meet your AI study buddy that turns <em>"I'm cooked"</em> into <em>"Wait, I actually get it."</em>
-      </p>
-    </div>
-
-    <!-- Scene 2: Exam Game Plan (5s - 10s) -->
-    <div class="scene-text-block" id="textScene2">
-      <div class="feature-badge-pill">
-        <span>🗺️</span>
-        <span>EXAM GAME PLAN</span>
-      </div>
-      <h2 class="feature-heading-serif">
-        From panic mode<br>to a plan that works.
-      </h2>
-    </div>
-
-    <!-- Scene 3: Homework Helper (10s - 15s) -->
-    <div class="scene-text-block" id="textScene3">
-      <div class="feature-badge-pill badge-pill-cyan">
-        <span>📚</span>
-        <span>HOMEWORK HELPER</span>
-      </div>
-      <h2 class="feature-heading-serif">
-        Stuck?<br>Let's figure it out together.
-      </h2>
-    </div>
-
-    <!-- Scene 4: Teach Me My Way (15s - 20s) -->
-    <div class="scene-text-block" id="textScene4">
-      <div class="feature-badge-pill badge-pill-purple">
-        <span>🎮</span>
-        <span>TEACH ME MY WAY</span>
-      </div>
-      <h2 class="feature-heading-serif">
-        Your brain.<br>Your pace. Your way.
-      </h2>
-    </div>
-
-    <!-- Scene 5: Transition to the Actual Product (20s - 25s) -->
-    <div class="scene-text-block scene5-center-wrap" id="textScene5">
-      <h2 class="scene5-title">
-        Ready for your academic comeback?
-      </h2>
-      <button type="button" class="scene5-cta-button" id="btnHeroLetsGetStarted">
-        <span>LET'S GET STARTED →</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- 3D HUD Controller at Bottom of Hero -->
-  <div class="hero-hud">
-    <div class="hud-timeline-track" id="hudTrack">
-      <div class="hud-timeline-progress" id="hudProgress"></div>
-    </div>
-    <div class="hud-actions-row">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <button type="button" class="hud-btn" id="btnHudPlay">⏸ Pause</button>
-        <button type="button" class="hud-btn" id="btnHudReplay">↺ Replay</button>
-        <span class="hud-timestamp" id="hudTime">00:00 / 00:25</span>
-      </div>
-      <button type="button" class="hud-btn" id="btnHudScrollDown" style="background:#FF9F1C;color:#000;border:0;">
-        Scroll to Study Tool ↓
-      </button>
-    </div>
-  </div>
+<section id="landing">
+<div class="hero" id="hero">
+<svg class="scene" id="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241866"/><stop offset=".45" stop-color="#6A3B9E"/><stop offset=".75" stop-color="#D9658A"/><stop offset="1" stop-color="#FF9E6B"/></linearGradient>
+<radialGradient id="glow" cx="1100" cy="330" r="620" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFC27A" stop-opacity=".9"/><stop offset="1" stop-color="#FF8A5B" stop-opacity="0"/></radialGradient>
+<linearGradient id="lit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE0A0"/><stop offset=".5" stop-color="#FF9A55"/><stop offset="1" stop-color="#C9456E"/></linearGradient>
+<linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A55BE"/><stop offset="1" stop-color="#3C2A86"/></linearGradient>
+<linearGradient id="far" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9A7BDD"/><stop offset="1" stop-color="#5E4AAE"/></linearGradient>
+<linearGradient id="mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A3797"/><stop offset="1" stop-color="#241B63"/></linearGradient>
+<linearGradient id="lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9F7A"/><stop offset=".4" stop-color="#9C78D6"/><stop offset="1" stop-color="#4F3A9E"/></linearGradient>
+</defs>
+<rect width="1440" height="900" fill="url(#sky)"/>
+<g class="ly" data-s=".22"><rect width="1440" height="900" fill="url(#glow)"/></g>
+<g class="ly" data-s=".34"><g class="cl a"><g fill="#FFE6EE" opacity=".85"><ellipse cx="1210" cy="190" rx="90" ry="26"/><ellipse cx="1160" cy="172" rx="52" ry="28"/><ellipse cx="1250" cy="170" rx="44" ry="24"/></g></g>
+<g class="cl b"><g fill="#F5D9F0" opacity=".7"><ellipse cx="420" cy="170" rx="80" ry="20"/><ellipse cx="380" cy="158" rx="42" ry="22"/></g></g><g class="birds" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path class="bd" style="animation-delay:0.00s" transform="translate(640 250) scale(1.1)" d="M0 0q8-9 16 0q8-9 16 0"/><path class="bd" style="animation-delay:0.13s" transform="translate(700 215) scale(1)" d="M0 0q8-9 16 0q8-9 16 0"/><path class="bd" style="animation-delay:0.26s" transform="translate(760 270) scale(0.9)" d="M0 0q8-9 16 0q8-9 16 0"/><path class="bd" style="animation-delay:0.39s" transform="translate(830 235) scale(1.2)" d="M0 0q8-9 16 0q8-9 16 0"/><path class="bd" style="animation-delay:0.52s" transform="translate(900 300) scale(0.8)" d="M0 0q8-9 16 0q8-9 16 0"/><path class="bd" style="animation-delay:0.65s" transform="translate(960 260) scale(1)" d="M0 0q8-9 16 0q8-9 16 0"/><path class="bd" style="animation-delay:0.78s" transform="translate(560 300) scale(0.8)" d="M0 0q8-9 16 0q8-9 16 0"/><path class="bd" style="animation-delay:0.91s" transform="translate(1040 320) scale(0.9)" d="M0 0q8-9 16 0q8-9 16 0"/></g></g>
+<g class="ly" data-s=".28"><path fill="url(#far)" opacity=".8" d="M0 560L160 450L260 500L380 400L520 520L640 470L760 540L900 430L1040 520L1200 440L1340 520L1440 480V900H0Z"/></g>
+<g class="ly" data-s=".2"><path fill="url(#shade)" d="M1010 200C960 270 930 330 880 400C820 480 740 560 620 660L960 720C975 540 990 380 1010 200Z"/><path fill="url(#lit)" d="M1010 200C1040 280 1100 330 1160 400C1240 480 1330 560 1440 640V740L960 720C975 540 990 380 1010 200Z"/><g fill="none" stroke-linecap="round"><path d="M1040 300C1070 380 1110 430 1180 500" stroke="#C9456E" stroke-opacity=".4" stroke-width="5"/><path d="M1010 380C1040 460 1090 520 1150 590" stroke="#C9456E" stroke-opacity=".35" stroke-width="7"/><path d="M1060 270C1100 330 1170 380 1250 450" stroke="#FFF1CF" stroke-opacity=".55" stroke-width="3"/><path d="M1000 480C1020 540 1040 600 1070 680" stroke="#B3385F" stroke-opacity=".3" stroke-width="9"/><path d="M930 330C900 400 850 470 780 540" stroke="#B79CF0" stroke-opacity=".45" stroke-width="4"/><path d="M960 420C930 500 880 570 820 630" stroke="#2B1D78" stroke-opacity=".35" stroke-width="8"/></g><path d="M1010 200C990 300 975 460 960 720" stroke="#FFE7B8" stroke-opacity=".55" stroke-width="3" fill="none"/></g>
+<g class="ly" data-s=".12"><path fill="url(#mid)" d="M0 640C120 590 220 600 330 640C440 560 540 580 650 650C760 600 880 610 980 680C1100 620 1240 640 1440 700V900H0Z"/></g>
+<g class="ly" data-s=".06"><rect y="720" width="1440" height="120" fill="url(#lake)" opacity=".95"/><g stroke="#FFD9B0" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"><path d="M120 748h70M260 770h50M560 752h90M700 790h60M980 760h80M1120 800h50"/></g><ellipse cx="360" cy="778" rx="46" ry="28" fill="#8A5FB8"/><ellipse cx="352" cy="768" rx="26" ry="12" fill="#B48AD8"/><ellipse cx="520" cy="792" rx="58" ry="24" fill="#6B4A9E"/><ellipse cx="510" cy="784" rx="30" ry="10" fill="#9570C9"/></g>
+<rect y="836" width="1440" height="70" fill="#2A2064"/><path fill="#1F1757" d="M0 700C140 650 300 700 430 780C490 822 470 872 440 906H0Z"/>
+<path fill="#2A2064" d="M860 900C960 820 1100 800 1200 800C1320 800 1400 780 1440 760V900Z"/>
+<g class="gr g1"><path fill="#D9708A" d="M1111 906Q1111 863 1110 827Q1118 866 1120 906Z"/><path fill="#D9708A" d="M829 906Q837 868 855 837Q849 872 838 906Z"/><path fill="#F2B84B" d="M876 906Q879 848 887 800Q888 853 885 906Z"/><path fill="#F2B84B" d="M1299 906Q1292 858 1275 819Q1294 862 1308 906Z"/><path fill="#F2B84B" d="M1224 906Q1217 844 1202 793Q1220 850 1233 906Z"/><path fill="#F2B84B" d="M872 906Q872 834 873 776Q880 841 881 906Z"/><path fill="#D9708A" d="M1359 906Q1355 865 1347 831Q1360 868 1368 906Z"/><path fill="#D9708A" d="M1422 906Q1415 832 1399 772Q1418 839 1431 906Z"/><path fill="#F2B84B" d="M1379 906Q1372 846 1356 796Q1374 851 1388 906Z"/><path fill="#E8964A" d="M827 906Q822 834 809 775Q825 840 836 906Z"/><path fill="#F2B84B" d="M1209 906Q1211 863 1217 828Q1220 867 1218 906Z"/><path fill="#D9708A" d="M1364 906Q1367 852 1373 807Q1376 856 1373 906Z"/><path fill="#D9708A" d="M965 906Q968 866 976 833Q978 870 974 906Z"/><path fill="#F2B84B" d="M1434 906Q1433 860 1431 822Q1440 864 1443 906Z"/><path fill="#D9708A" d="M1340 906Q1333 823 1318 755Q1336 830 1349 906Z"/><path fill="#E8964A" d="M841 906Q837 830 828 767Q842 836 850 906Z"/><path fill="#E8964A" d="M1324 906Q1331 843 1347 792Q1342 849 1333 906Z"/><path fill="#E8964A" d="M1256 906Q1257 832 1259 772Q1264 839 1265 906Z"/><path fill="#F2B84B" d="M1086 906Q1093 856 1110 815Q1105 860 1095 906Z"/><path fill="#E8964A" d="M1029 906Q1032 868 1039 836Q1041 871 1038 906Z"/><path fill="#D9708A" d="M1317 906Q1316 838 1312 783Q1322 844 1326 906Z"/><path fill="#F2B84B" d="M1239 906Q1243 853 1251 810Q1252 858 1248 906Z"/><path fill="#F2B84B" d="M900 906Q900 837 900 781Q907 844 909 906Z"/><path fill="#E8964A" d="M1130 906Q1132 863 1135 827Q1140 866 1139 906Z"/><path fill="#D9708A" d="M820 906Q813 826 798 761Q816 834 829 906Z"/><path fill="#E8964A" d="M1366 906Q1374 817 1392 745Q1386 826 1375 906Z"/><path fill="#D9708A" d="M1128 906Q1127 825 1124 758Q1133 832 1137 906Z"/><path fill="#E8964A" d="M1288 906Q1296 832 1313 772Q1308 839 1297 906Z"/><path fill="#E8964A" d="M850 906Q844 814 829 739Q846 822 859 906Z"/><path fill="#F2B84B" d="M1265 906Q1270 824 1281 757Q1280 832 1274 906Z"/><path fill="#E8964A" d="M842 906Q847 822 860 753Q858 830 851 906Z"/><path fill="#E8964A" d="M1371 906Q1379 825 1397 759Q1391 832 1380 906Z"/><path fill="#D9708A" d="M1071 906Q1070 823 1069 755Q1077 830 1080 906Z"/><path fill="#E8964A" d="M1135 906Q1136 872 1138 844Q1144 875 1144 906Z"/><path fill="#E8964A" d="M952 906Q946 830 933 768Q950 837 961 906Z"/><path fill="#E8964A" d="M840 906Q847 858 863 819Q858 862 849 906Z"/><path fill="#E8964A" d="M912 906Q909 821 901 752Q914 829 921 906Z"/><path fill="#F2B84B" d="M1180 906Q1174 838 1159 783Q1176 844 1189 906Z"/><path fill="#E8964A" d="M1239 906Q1242 845 1248 795Q1250 850 1248 906Z"/><path fill="#D9708A" d="M920 906Q920 816 921 742Q928 824 929 906Z"/><path fill="#E8964A" d="M1065 906Q1065 824 1065 756Q1072 831 1074 906Z"/><path fill="#F2B84B" d="M1169 906Q1164 857 1152 817Q1168 862 1178 906Z"/><path fill="#D9708A" d="M960 906Q956 863 948 827Q961 866 969 906Z"/><path fill="#D9708A" d="M1018 906Q1020 872 1023 845Q1028 876 1027 906Z"/><path fill="#F2B84B" d="M966 906Q964 855 958 813Q969 860 975 906Z"/><path fill="#E8964A" d="M929 906Q931 844 937 793Q940 850 938 906Z"/><path fill="#F2B84B" d="M1404 906Q1402 833 1398 774Q1408 840 1413 906Z"/><path fill="#D9708A" d="M1307 906Q1312 830 1322 767Q1322 836 1316 906Z"/><path fill="#D9708A" d="M835 906Q842 841 858 788Q854 847 844 906Z"/><path fill="#E8964A" d="M1352 906Q1352 846 1351 796Q1358 851 1361 906Z"/><path fill="#D9708A" d="M1183 906Q1184 866 1187 833Q1192 870 1192 906Z"/><path fill="#F2B84B" d="M1190 906Q1186 869 1176 839Q1190 872 1199 906Z"/><path fill="#F2B84B" d="M993 906Q988 842 977 790Q992 848 1002 906Z"/><path fill="#F2B84B" d="M1128 906Q1121 831 1105 770Q1124 838 1137 906Z"/><path fill="#D9708A" d="M780 906Q775 833 763 774Q778 840 789 906Z"/><path fill="#F2B84B" d="M883 906Q887 848 896 800Q896 853 892 906Z"/><path fill="#E8964A" d="M852 906Q856 859 865 820Q866 863 861 906Z"/><path fill="#E8964A" d="M932 906Q929 828 922 765Q934 836 941 906Z"/><path fill="#F2B84B" d="M1396 906Q1397 848 1400 800Q1405 853 1405 906Z"/><path fill="#E8964A" d="M898 906Q900 814 903 738Q908 822 907 906Z"/><path fill="#F2B84B" d="M1271 906Q1269 839 1264 785Q1274 846 1280 906Z"/><path fill="#E8964A" d="M927 906Q933 866 948 833Q944 870 936 906Z"/><path fill="#F2B84B" d="M1051 906Q1056 839 1069 785Q1067 846 1060 906Z"/><path fill="#D9708A" d="M1308 906Q1304 872 1295 844Q1308 875 1317 906Z"/><path fill="#D9708A" d="M1150 906Q1155 863 1168 828Q1166 867 1159 906Z"/><path fill="#E8964A" d="M807 906Q809 820 814 749Q818 828 816 906Z"/><path fill="#D9708A" d="M1438 906Q1432 812 1417 736Q1434 821 1447 906Z"/><path fill="#F2B84B" d="M1047 906Q1046 837 1044 780Q1052 843 1056 906Z"/><path fill="#D9708A" d="M1144 906Q1140 819 1132 748Q1145 827 1153 906Z"/><path fill="#E8964A" d="M1334 906Q1336 819 1340 747Q1344 826 1343 906Z"/><path fill="#F2B84B" d="M325 906Q329 882 338 862Q338 884 334 906Z"/><path fill="#D9708A" d="M122 906Q122 861 121 824Q128 865 131 906Z"/><path fill="#E8964A" d="M116 906Q118 883 123 864Q126 885 125 906Z"/><path fill="#F2B84B" d="M182 906Q174 864 157 830Q176 868 191 906Z"/><path fill="#F2B84B" d="M143 906Q140 873 133 846Q145 876 152 906Z"/><path fill="#D9708A" d="M309 906Q310 877 311 854Q317 880 318 906Z"/><path fill="#F2B84B" d="M178 906Q172 877 157 853Q174 880 187 906Z"/><path fill="#F2B84B" d="M52 906Q53 882 56 862Q61 884 61 906Z"/><path fill="#D9708A" d="M172 906Q173 882 176 863Q181 884 181 906Z"/><path fill="#E8964A" d="M312 906Q304 860 286 823Q306 864 321 906Z"/><path fill="#F2B84B" d="M176 906Q180 861 191 825Q190 866 185 906Z"/><path fill="#D9708A" d="M61 906Q60 858 59 818Q67 862 70 906Z"/><path fill="#E8964A" d="M102 906Q98 873 87 846Q102 876 111 906Z"/><path fill="#D9708A" d="M325 906Q319 878 304 855Q322 880 334 906Z"/><path fill="#D9708A" d="M202 906Q202 874 201 847Q208 876 211 906Z"/><path fill="#F2B84B" d="M43 906Q38 864 27 830Q42 868 52 906Z"/><path fill="#D9708A" d="M65 906Q60 889 48 875Q64 890 74 906Z"/><path fill="#F2B84B" d="M238 906Q242 861 253 825Q252 866 247 906Z"/><path fill="#E8964A" d="M313 906Q317 861 325 824Q326 865 322 906Z"/><path fill="#D9708A" d="M179 906Q182 885 188 867Q190 886 188 906Z"/><path fill="#D9708A" d="M67 906Q59 889 41 875Q61 890 76 906Z"/><path fill="#F2B84B" d="M52 906Q58 871 73 843Q70 874 61 906Z"/><path fill="#F2B84B" d="M222 906Q218 859 208 821Q222 864 231 906Z"/><path fill="#E8964A" d="M14 906Q10 881 1 860Q14 883 23 906Z"/><path fill="#D9708A" d="M256 906Q263 881 278 861Q274 884 265 906Z"/><path fill="#E8964A" d="M166 906Q168 881 174 860Q177 883 175 906Z"/></g>
+<g id="hk" transform="translate(1185 812) scale(.92)"><path d="M-38-165C-60-120-62-60-50 0L40 0C52-60 48-120 34-165Z" fill="#7A4B2A"/><path class="scarf" d="M-20-150C20-165 70-160 120-135C150-120 175-125 205-145C195-110 150-100 110-105C70-110 30-120-10-125Z" fill="#E4532F"/><path d="M20-150C70-150 78-90 70-50C60-30 30-30 22-45Z" fill="#3D2A1E"/><rect x="14" y="-165" width="62" height="14" rx="7" fill="#D9A441"/><path d="M-62-168L0-232L62-168Q0-150-62-168Z" fill="#E7A83B"/><ellipse cx="0" cy="-168" rx="66" ry="9" fill="#C98A25"/></g>
+<g class="gr g2"><path fill="#3A2A80" d="M954 906Q955 880 956 859Q962 882 963 906Z"/><path fill="#241A5C" d="M1417 906Q1419 848 1423 800Q1427 853 1426 906Z"/><path fill="#241A5C" d="M953 906Q950 847 942 798Q954 852 962 906Z"/><path fill="#2B1F66" d="M1342 906Q1344 883 1350 864Q1353 885 1351 906Z"/><path fill="#2B1F66" d="M824 906Q821 874 815 847Q826 876 833 906Z"/><path fill="#241A5C" d="M1304 906Q1300 841 1291 787Q1304 846 1313 906Z"/><path fill="#241A5C" d="M883 906Q887 861 896 825Q896 866 892 906Z"/><path fill="#241A5C" d="M1388 906Q1384 850 1374 805Q1388 856 1397 906Z"/><path fill="#3A2A80" d="M878 906Q876 867 870 835Q881 870 887 906Z"/><path fill="#3A2A80" d="M863 906Q867 877 875 854Q876 880 872 906Z"/><path fill="#3A2A80" d="M1395 906Q1390 882 1379 863Q1394 884 1404 906Z"/><path fill="#241A5C" d="M1153 906Q1157 841 1165 788Q1166 847 1162 906Z"/><path fill="#3A2A80" d="M1344 906Q1343 870 1341 841Q1350 874 1353 906Z"/><path fill="#241A5C" d="M1340 906Q1343 847 1350 798Q1352 852 1349 906Z"/><path fill="#241A5C" d="M1073 906Q1072 848 1069 800Q1078 853 1082 906Z"/><path fill="#3A2A80" d="M1027 906Q1023 853 1015 809Q1028 858 1036 906Z"/><path fill="#3A2A80" d="M944 906Q946 856 952 816Q955 861 953 906Z"/><path fill="#3A2A80" d="M894 906Q892 837 889 781Q898 844 903 906Z"/><path fill="#2B1F66" d="M894 906Q894 869 893 839Q900 872 903 906Z"/><path fill="#2B1F66" d="M978 906Q979 839 981 784Q986 845 987 906Z"/><path fill="#2B1F66" d="M1079 906Q1082 875 1088 849Q1090 878 1088 906Z"/><path fill="#2B1F66" d="M916 906Q919 856 927 816Q928 861 925 906Z"/><path fill="#241A5C" d="M1049 906Q1051 873 1056 846Q1060 876 1058 906Z"/><path fill="#2B1F66" d="M1233 906Q1235 860 1239 823Q1243 864 1242 906Z"/><path fill="#241A5C" d="M1185 906Q1180 862 1170 826Q1184 866 1194 906Z"/><path fill="#241A5C" d="M1194 906Q1194 883 1195 864Q1202 885 1203 906Z"/><path fill="#3A2A80" d="M1289 906Q1283 853 1270 810Q1286 858 1298 906Z"/><path fill="#3A2A80" d="M1159 906Q1165 848 1178 800Q1176 853 1168 906Z"/><path fill="#2B1F66" d="M1344 906Q1340 880 1331 858Q1344 882 1353 906Z"/><path fill="#3A2A80" d="M927 906Q926 878 923 856Q932 881 936 906Z"/><path fill="#2B1F66" d="M860 906Q859 871 857 843Q866 874 869 906Z"/><path fill="#2B1F66" d="M1252 906Q1254 866 1257 833Q1262 870 1261 906Z"/><path fill="#3A2A80" d="M1369 906Q1374 848 1385 801Q1384 854 1378 906Z"/><path fill="#2B1F66" d="M1154 906Q1153 878 1151 855Q1160 880 1163 906Z"/><path fill="#3A2A80" d="M1007 906Q1002 854 991 812Q1006 859 1016 906Z"/><path fill="#3A2A80" d="M837 906Q832 839 822 785Q836 846 846 906Z"/><path fill="#2B1F66" d="M905 906Q903 842 899 789Q909 848 914 906Z"/><path fill="#2B1F66" d="M1090 906Q1093 876 1099 851Q1102 878 1099 906Z"/><path fill="#3A2A80" d="M1167 906Q1169 846 1173 796Q1177 851 1176 906Z"/><path fill="#241A5C" d="M952 906Q956 881 965 861Q966 884 961 906Z"/><path fill="#3A2A80" d="M1064 906Q1061 876 1054 852Q1066 879 1073 906Z"/><path fill="#3A2A80" d="M871 906Q869 871 863 843Q874 874 880 906Z"/><path fill="#3A2A80" d="M1132 906Q1130 847 1125 799Q1136 852 1141 906Z"/><path fill="#3A2A80" d="M1276 906Q1273 849 1267 802Q1278 854 1285 906Z"/><path fill="#2B1F66" d="M1175 906Q1174 883 1171 864Q1180 885 1184 906Z"/><path fill="#241A5C" d="M835 906Q839 883 847 864Q848 885 844 906Z"/><path fill="#2B1F66" d="M1014 906Q1017 848 1024 801Q1026 854 1023 906Z"/><path fill="#241A5C" d="M1277 906Q1279 877 1284 853Q1288 880 1286 906Z"/><path fill="#241A5C" d="M1326 906Q1328 846 1331 797Q1336 852 1335 906Z"/><path fill="#3A2A80" d="M1135 906Q1133 869 1129 839Q1139 872 1144 906Z"/><path fill="#3A2A80" d="M1023 906Q1019 839 1011 785Q1024 846 1032 906Z"/><path fill="#2B1F66" d="M1175 906Q1171 881 1163 860Q1176 883 1184 906Z"/><path fill="#3A2A80" d="M892 906Q891 840 888 786Q897 846 901 906Z"/><path fill="#241A5C" d="M987 906Q982 880 972 859Q986 882 996 906Z"/><path fill="#241A5C" d="M1210 906Q1209 849 1208 802Q1216 854 1219 906Z"/><path fill="#3A2A80" d="M1068 906Q1063 864 1050 829Q1066 868 1077 906Z"/><path fill="#3A2A80" d="M1009 906Q1008 873 1006 846Q1014 876 1018 906Z"/><path fill="#3A2A80" d="M823 906Q824 866 826 833Q832 870 832 906Z"/><path fill="#2B1F66" d="M1380 906Q1378 861 1375 825Q1384 866 1389 906Z"/><path fill="#2B1F66" d="M1136 906Q1137 869 1138 839Q1144 872 1145 906Z"/><path fill="#2B1F66" d="M0 906Q2 880 8 859Q11 882 9 906Z"/><path fill="#241A5C" d="M243 906Q248 882 259 863Q258 884 252 906Z"/><path fill="#2B1F66" d="M102 906Q107 883 118 865Q117 886 111 906Z"/><path fill="#2B1F66" d="M46 906Q43 883 35 864Q48 885 55 906Z"/><path fill="#3A2A80" d="M204 906Q200 871 190 843Q204 874 213 906Z"/><path fill="#241A5C" d="M11 906Q12 881 14 861Q20 884 20 906Z"/><path fill="#241A5C" d="M119 906Q117 889 112 875Q122 890 128 906Z"/><path fill="#241A5C" d="M305 906Q306 878 309 856Q314 881 314 906Z"/><path fill="#241A5C" d="M253 906Q254 887 255 871Q261 888 262 906Z"/><path fill="#2B1F66" d="M316 906Q314 869 309 839Q320 872 325 906Z"/><path fill="#241A5C" d="M262 906Q265 870 273 840Q274 873 271 906Z"/><path fill="#241A5C" d="M358 906Q356 874 350 848Q361 877 367 906Z"/><path fill="#241A5C" d="M258 906Q254 872 243 844Q258 875 267 906Z"/><path fill="#2B1F66" d="M299 906Q298 868 297 837Q305 872 308 906Z"/><path fill="#241A5C" d="M15 906Q13 891 7 878Q18 892 24 906Z"/><path fill="#3A2A80" d="M184 906Q186 888 192 874Q195 890 193 906Z"/><path fill="#241A5C" d="M285 906Q280 890 270 877Q284 892 294 906Z"/><path fill="#3A2A80" d="M272 906Q272 868 271 837Q278 872 281 906Z"/><path fill="#2B1F66" d="M135 906Q139 892 148 880Q148 893 144 906Z"/><path fill="#241A5C" d="M257 906Q254 873 246 846Q258 876 266 906Z"/><path fill="#3A2A80" d="M269 906Q273 890 283 876Q283 891 278 906Z"/><path fill="#241A5C" d="M38 906Q38 883 37 864Q44 885 47 906Z"/><path fill="#3A2A80" d="M105 906Q109 884 118 866Q118 886 114 906Z"/><path fill="#241A5C" d="M195 906Q199 890 209 876Q209 891 204 906Z"/><path fill="#2B1F66" d="M147 906Q146 891 143 878Q152 892 156 906Z"/><path fill="#3A2A80" d="M307 906Q308 887 312 871Q316 888 316 906Z"/><path fill="#241A5C" d="M333 906Q334 868 336 836Q342 871 342 906Z"/><path fill="#3A2A80" d="M290 906Q285 887 274 872Q289 889 299 906Z"/></g>
+</svg>
+<nav class="lnav" aria-label="Main"><div class="lbrand"><i></i>BigBrainn’t</div><div class="llinks"><button data-go="rushCard">Exam Game Plan</button><button data-go="hwCard">Homework</button><button data-go="vibeCard">Teach me</button><button class="lbox" data-go="">Use it free</button></div></nav>
+<div class="hcopy">
+<p class="eyebrow"><span class="bars"><b></b><b></b><b></b></span>Don’t wanna use your brain for homework? Ask me.</p>
+<div class="big" role="heading" aria-level="1">BigBrainn’t</div>
+<p class="hp">Your brain is tired. Mine isn’t. Exam plans, homework answers and boring chapters explained your way. Hinglish bhi chalega.</p>
+<ul class="hf">
+<li><span>🗺️</span><div><b>Exam tomorrow?</b> Tell me the days and syllabus. I’ll plan every hour and tell you what to skip.</div></li>
+<li><span>📚</span><div><b>Homework?</b> Snap a photo. Get every answer the way your teacher wants, plus a “why” so it sticks.</div></li>
+<li><span>🎮</span><div><b>Boring chapter?</b> I’ll explain it in Minecraft, cricket or gossip.</div></li>
+</ul>
+<button class="cta" data-go="">Use now for free <span aria-hidden="true">▸</span></button>
+<p class="nf">Free. No signup. No brain required.</p>
+</div>
+</div>
+<section class="lp2"><div class="lw"><h2 class="serif rv">Pick your lazy superpower.</h2>
+<div class="lcards">
+<button class="lc rv" style="transition-delay:.05s" data-go="rushCard"><span class="le">🗺️</span><b>Exam Game Plan</b><span>Exam tomorrow and you haven’t started? Breathe. Give me the days and syllabus, and I’ll sort it into Must, Should and Skip, hour by hour.</span><em>Open ▸</em></button>
+<button class="lc rv" style="transition-delay:.18s" data-go="hwCard"><span class="le">📚</span><b>Homework Helper</b><span>Don’t wanna use your brain for homework? Ask me. Snap it, pick how your teacher wants it written, and get the answers with a quick “why”.</span><em>Open ▸</em></button>
+<button class="lc rv" style="transition-delay:.31s" data-go="vibeCard"><span class="le">🎮</span><b>Teach me my way</b><span>Textbooks are boring. Minecraft, cricket, gossip, anything. I’ll explain it in your world. Hinglish bhi chalega.</span><em>Open ▸</em></button>
+</div></div></section>
+<section class="lp3"><div class="lw"><h2 class="serif rv">Your brain called. It wants a day off.</h2><p class="rv" style="transition-delay:.12s">Let BigBrainn’t do the heavy lifting. You just collect the marks.</p><button class="cta rv" style="transition-delay:.24s" data-go="">Use now for free <span aria-hidden="true">▸</span></button></div></section>
 </section>
-
-<!-- ==========================================================================
-     THE REVERTED ORIGINAL AI INTERFACE (.app)
-     ========================================================================== -->
 <div class="app" id="app">
   <button class="btn" id="menu" aria-label="Open menu">☰</button>
-  
   <aside id="side">
     <div class="brand"><i></i>BigBrainn’t</div>
     <button class="btn" id="newChat">+ New chat</button>
-    <button class="btn" id="introStoryBtn" style="color:var(--v);font-weight:600;">🎬 Replay 3D Intro</button>
     <div id="hist"></div>
     <div id="acct" hidden><button class="btn" id="loginBtn" style="width:100%">Log in / Sign up</button></div>
     <button class="btn" id="aboutBtn">About me</button>
@@ -867,12 +222,8 @@ input, select, textarea {
       <div class="col">
         <div id="empty">
           <div class="orb" aria-hidden="true"></div>
-          
-          <!-- BIG, ELEGANT EDITORIAL CURSIVE HEADLINE -->
           <h1>Hey, what are we cracking today?</h1>
-          
           <p class="intro">Exam coming up? Doubt at 2 AM? Homework piling up? Type a topic, or pick a tool below.</p>
-          
           <div id="homeSlot">
             <div id="dock">
               <div class="comp">
@@ -881,70 +232,42 @@ input, select, textarea {
                 <div class="crow">
                   <button class="tb" id="cam" type="button" title="Add a photo of your question or notes" aria-label="Add photo">📷</button>
                   <input type="file" id="file" accept="image/*" hidden>
-                  <select id="lang" aria-label="Reply language">
-                    <option value="auto">Auto language</option>
-                    <option value="english">English</option>
-                    <option value="hinglish">Hinglish</option>
-                  </select>
-                  <span class="lab">Make it about</span>
-                  <span id="ichips" class="crow" style="margin:0"></span>
+                  <select id="lang" aria-label="Reply language"><option value="auto">Auto language</option><option value="english">English</option><option value="hinglish">Hinglish</option></select>
+                  <span class="lab">Make it about</span><span id="ichips" class="crow" style="margin:0"></span>
                   <input id="interest" maxlength="60" placeholder="or type yours" aria-label="Your interest">
                   <button id="send" aria-label="Send">↑</button>
                 </div>
               </div>
-
-              <!-- 3 Original Prominent Launch Cards -->
               <div class="cards">
-                <button class="card c1" id="rushCard">
-                  <b>🗺️ Exam Game Plan</b>
-                  <span>Tell me the days left and the syllabus. I'll map out every study hour.</span>
-                </button>
-                <button class="card c3" id="hwCard">
-                  <b>📚 Homework Helper</b>
-                  <span>Snap or type your homework. Get answers written the way your teacher wants.</span>
-                </button>
-                <button class="card c2" id="vibeCard">
-                  <b>🎮 Teach me my way</b>
-                  <span>Minecraft, cricket, gossip... pick your world and I'll explain in it.</span>
-                </button>
+                <button class="card c1" id="rushCard"><b>🗺️ Exam Game Plan</b><span>Tell me the days left and the syllabus. I'll map out every study hour.</span></button>
+                <button class="card c3" id="hwCard"><b>📚 Homework Helper</b><span>Snap or type your homework. Get answers written the way your teacher wants.</span></button>
+                <button class="card c2" id="vibeCard"><b>🎮 Teach me my way</b><span>Minecraft, cricket, gossip... pick your world and I'll explain in it.</span></button>
               </div>
             </div>
           </div>
         </div>
-
         <div id="thread"></div>
       </div>
     </div>
-
     <div id="dockSlot"></div>
     <p class="note">AI can make mistakes. Check important facts with your textbook or teacher. · v5.2</p>
   </section>
 </div>
 
-<!-- Original Dialogs -->
 <dialog id="rushDlg">
   <h2>🗺️ Exam Game Plan</h2>
   <div class="muted">Tell me your situation. I'll plan every hour.</div>
   <label for="subject">Subject</label>
   <input id="subject" maxlength="200" placeholder="e.g. Class 10 Science" autocomplete="off">
   <label for="examVal">My exam is in</label>
-  <div class="row">
-    <input id="examVal" type="number" min="1" max="60" value="3">
-    <select id="examUnit">
-      <option value="days">days</option>
-      <option value="hours">hours</option>
-    </select>
-  </div>
+  <div class="row"><input id="examVal" type="number" min="1" max="60" value="3"><select id="examUnit"><option value="days">days</option><option value="hours">hours</option></select></div>
   <div id="pdBox"><label>Hours I can study each day</label><div class="chips" id="pdChips"></div></div>
   <label for="syllabus">Syllabus left</label>
   <textarea id="syllabus" rows="4" maxlength="3000" placeholder="Paste chapters or topics. Or write: 12 chapters, haven't started 7."></textarea>
   <label>Where do I stand?</label>
   <div class="chips" id="lvChips"></div>
   <p class="err" id="rerr" hidden></p>
-  <div class="acts">
-    <button class="btn" id="rCancel">Cancel</button>
-    <button class="go" id="rGo">Build my plan</button>
-  </div>
+  <div class="acts"><button class="btn" id="rCancel">Cancel</button><button class="go" id="rGo">Build my plan</button></div>
 </dialog>
 
 <dialog id="hwDlg">
@@ -962,10 +285,7 @@ input, select, textarea {
   <label for="hwNote">Teacher's instructions (optional)</label>
   <input id="hwNote" maxlength="300" placeholder="e.g. answer in 3 points, draw a labelled diagram">
   <p class="err" id="hwerr" hidden></p>
-  <div class="acts">
-    <button class="btn" id="hwCancel">Cancel</button>
-    <button class="go" id="hwGo">Solve it</button>
-  </div>
+  <div class="acts"><button class="btn" id="hwCancel">Cancel</button><button class="go" id="hwGo">Solve it</button></div>
 </dialog>
 
 <dialog id="authDlg">
@@ -976,10 +296,7 @@ input, select, textarea {
   <label for="pw">Password</label>
   <input id="pw" type="password" autocomplete="current-password" placeholder="At least 6 characters">
   <p class="err" id="aerr" hidden></p>
-  <div class="acts">
-    <button class="btn" id="aCancel">Cancel</button>
-    <button class="go" id="aGo">Log in</button>
-  </div>
+  <div class="acts"><button class="btn" id="aCancel">Cancel</button><button class="go" id="aGo">Log in</button></div>
   <p style="text-align:center;margin:14px 0 0"><a href="#" id="aSw" style="color:var(--v)">New here? Create an account</a></p>
 </dialog>
 
@@ -991,762 +308,174 @@ input, select, textarea {
   <div class="acts"><button class="go" id="aClose">Close</button></div>
 </dialog>
 
-<script src="config.js"></script>
-
+<script src="/config.js"></script>
 <script>
-/* ==========================================================================
-   THE 3D ANIMATED VIDEO RUNS RIGHT IN THE HERO SECTION (THREE.JS)
-   ========================================================================== */
-const TOTAL_DURATION = 25.0; // 25s continuous 3D cinematography
-let heroTime = 0;
-let isHeroPlaying = true;
-
-const heroCanvas = document.getElementById("webglHeroCanvas");
-
-// WebGL Renderer
-const renderer = new THREE.WebGLRenderer({
-  canvas: heroCanvas,
-  antialias: true,
-  powerPreference: "high-performance"
-});
-renderer.setSize(heroCanvas.clientWidth || innerWidth, heroCanvas.clientHeight || innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color("#09061A");
-scene.fog = new THREE.FogExp2("#09061A", 0.022);
-
-const camera = new THREE.PerspectiveCamera(45, (heroCanvas.clientWidth || innerWidth) / (heroCanvas.clientHeight || innerHeight), 0.1, 150);
-camera.position.set(0, 2.5, 12);
-
-// Lighting
-const ambLight = new THREE.AmbientLight("#4A3780", 1.8);
-scene.add(ambLight);
-const keyLight = new THREE.DirectionalLight("#FFE2A0", 3.2);
-keyLight.position.set(12, 18, 14);
-scene.add(keyLight);
-const rimP = new THREE.PointLight("#7C6CFF", 5.0, 35);
-rimP.position.set(-10, 6, -8);
-scene.add(rimP);
-const rimO = new THREE.PointLight("#FF9F1C", 6.5, 35);
-rimO.position.set(10, 4, -4);
-scene.add(rimO);
-
-// 1,200 Floating Stardust Particles
-const pCount = 1200;
-const pGeo = new THREE.BufferGeometry();
-const pPos = new Float32Array(pCount * 3);
-const pCols = new Float32Array(pCount * 3);
-const palette = [new THREE.Color("#FFD166"), new THREE.Color("#FF9F1C"), new THREE.Color("#CBB8FF"), new THREE.Color("#2EC4B6"), new THREE.Color("#FFFFFF")];
-
-for (let i = 0; i < pCount; i++) {
-  pPos[i * 3] = (Math.random() - 0.5) * 60;
-  pPos[i * 3 + 1] = (Math.random() - 0.5) * 35;
-  pPos[i * 3 + 2] = (Math.random() - 0.5) * 60;
-  const c = palette[Math.floor(Math.random() * palette.length)];
-  pCols[i * 3] = c.r; pCols[i * 3 + 1] = c.g; pCols[i * 3 + 2] = c.b;
-}
-pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-pGeo.setAttribute('color', new THREE.BufferAttribute(pCols, 3));
-const pMat = new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
-const pSys = new THREE.Points(pGeo, pMat);
-scene.add(pSys);
-
-// 3D Books & Winding Path (Scene 1)
-const scene1Group = new THREE.Group();
-scene.add(scene1Group);
-
-function createBook(colorHex) {
-  const g = new THREE.Group();
-  const cover = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.14, 2.9), new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.35, metalness: 0.15 }));
-  const pages = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.38, 2.7), new THREE.MeshStandardMaterial({ color: "#FFF6E5", roughness: 0.8 }));
-  pages.position.set(0.05, 0, 0);
-  const ribbon = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.42, 2.92), new THREE.MeshStandardMaterial({ color: "#FFD166", metalness: 0.8, roughness: 0.2 }));
-  ribbon.position.set(-1.0, 0, 0);
-  g.add(cover, pages, ribbon);
-  return g;
-}
-
-const floatingBooks = [];
-const bookColors = ["#3A1F6E", "#D9658A", "#1D1348", "#E07B00", "#1C6B61", "#6C5CFF"];
-for (let i = 0; i < 8; i++) {
-  const b = createBook(bookColors[i % bookColors.length]);
-  b.position.set((Math.random() - 0.5) * 16 + (i > 3 ? 5 : -5), (Math.random() - 0.5) * 6 + 1.5, (Math.random() - 0.5) * 14 - 2);
-  b.rotation.set(Math.random() * 0.8, Math.random() * Math.PI, Math.random() * 0.6);
-  b.scale.setScalar(0.75 + Math.random() * 0.4);
-  scene1Group.add(b);
-  floatingBooks.push({ mesh: b, rx: 0.002 + Math.random() * 0.004, ry: 0.003 + Math.random() * 0.005, fy: b.position.y, sp: 0.8 + Math.random() * 0.8 });
-}
-
-// Golden Path
-const pathCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-8, -1.8, 10), new THREE.Vector3(-3, -1.5, 4), new THREE.Vector3(2, -1.2, -2), new THREE.Vector3(0, -0.8, -9), new THREE.Vector3(5, -0.4, -18)
-]);
-const pathMesh = new THREE.Mesh(
-  new THREE.TubeGeometry(pathCurve, 64, 0.6, 8, false),
-  new THREE.MeshStandardMaterial({ color: "#FFB37C", emissive: "#FF9F1C", emissiveIntensity: 0.6, roughness: 0.2, metalness: 0.7 })
-);
-scene1Group.add(pathMesh);
-
-// Scene 2: 3D Calendar & Priority Cards
-const scene2Group = new THREE.Group();
-scene2Group.position.set(0, 0, -22);
-scene.add(scene2Group);
-const calBase = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.3, 5.2), new THREE.MeshStandardMaterial({ color: "#181045", roughness: 0.3, metalness: 0.3 }));
-calBase.rotation.x = 0.35;
-scene2Group.add(calBase);
-
-function createCard(col, xPos) {
-  const g = new THREE.Group();
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 1.2), new THREE.MeshStandardMaterial({ color: col, roughness: 0.2, metalness: 0.4 })));
-  g.position.set(xPos, 1.4, 0.6);
-  g.rotation.x = 0.2;
-  return g;
-}
-const cardMust = createCard("#FF6B8B", -2.2);
-const cardShould = createCard("#FFB37C", 0);
-const cardSkip = createCard("#7C6CFF", 2.2);
-scene2Group.add(cardMust, cardShould, cardSkip);
-
-// Scene 3: Open 3D Notebook & Lightbulb
-const scene3Group = new THREE.Group();
-scene3Group.position.set(0, 0, -44);
-scene.add(scene3Group);
-const nbLeft = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.08, 4.8), new THREE.MeshStandardMaterial({ color: "#2B1B6D", roughness: 0.4 }));
-nbLeft.position.set(-1.85, 0, 0);
-const nbRight = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.08, 4.8), new THREE.MeshStandardMaterial({ color: "#2B1B6D", roughness: 0.4 }));
-nbRight.position.set(1.85, 0, 0);
-const openNotebook = new THREE.Group();
-openNotebook.add(nbLeft, nbRight);
-openNotebook.rotation.x = 0.45;
-scene3Group.add(openNotebook);
-
-const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.04, 16, 64), new THREE.MeshBasicMaterial({ color: "#2EC4B6" }));
-ring.rotation.x = Math.PI / 2;
-ring.position.set(0, 0.8, 0);
-scene3Group.add(ring);
-
-const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 32), new THREE.MeshStandardMaterial({ color: "#FFF5D1", emissive: "#FFD166", emissiveIntensity: 1.8, roughness: 0.1 }));
-bulb.position.set(0, 2.2, 0);
-scene3Group.add(bulb);
-
-// Scene 4: Open Radiant Book & Transforming Concept Hologram
-const scene4Group = new THREE.Group();
-scene4Group.position.set(0, 0, -66);
-scene.add(scene4Group);
-const grandBook = new THREE.Group();
-const gLeft = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.1, 4.6), new THREE.MeshStandardMaterial({ color: "#FFF8E7", roughness: 0.5 }));
-gLeft.position.set(-1.75, 0, 0); gLeft.rotation.z = -0.15;
-const gRight = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.1, 4.6), new THREE.MeshStandardMaterial({ color: "#FFF8E7", roughness: 0.5 }));
-gRight.position.set(1.75, 0, 0); gRight.rotation.z = 0.15;
-grandBook.add(gLeft, gRight); grandBook.rotation.x = 0.5;
-scene4Group.add(grandBook);
-
-const conceptPrism = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2, 0), new THREE.MeshStandardMaterial({ color: "#CBB8FF", emissive: "#7C6CFF", emissiveIntensity: 0.8, wireframe: true }));
-conceptPrism.position.set(-1.8, 2.2, 0);
-scene4Group.add(conceptPrism);
-
-const mcBlock = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), new THREE.MeshStandardMaterial({ color: "#2EC4B6", roughness: 0.4, metalness: 0.2 }));
-mcBlock.position.set(1.8, 2.2, 0);
-scene4Group.add(mcBlock);
-
-// Scene 5: 3D Laptop with Dashboard Screen
-const scene5Group = new THREE.Group();
-scene5Group.position.set(0, 0, -88);
-scene.add(scene5Group);
-
-const sCanvas = document.createElement("canvas");
-sCanvas.width = 1920; sCanvas.height = 1200;
-const scCtx = sCanvas.getContext("2d");
-scCtx.fillStyle = "#0E0A28"; scCtx.fillRect(0, 0, 1920, 1200);
-scCtx.fillStyle = "#150F38"; scCtx.fillRect(0, 0, 1920, 100);
-scCtx.fillStyle = "#FF9F1C"; scCtx.beginPath(); scCtx.arc(80, 50, 16, 0, Math.PI * 2); scCtx.fill();
-scCtx.fillStyle = "#FFFFFF"; scCtx.font = "bold 34px sans-serif"; scCtx.fillText("BigBrainn’t", 115, 62);
-scCtx.fillStyle = "#FFFFFF"; scCtx.font = "italic 800 68px serif"; scCtx.textAlign = "center";
-scCtx.fillText("Hey, what are we cracking today?", 960, 260);
-
-const laptopBase = new THREE.Mesh(new THREE.BoxGeometry(10.5, 0.24, 7.2), new THREE.MeshStandardMaterial({ color: "#25203D", metalness: 0.8, roughness: 0.25 }));
-const lidGroup = new THREE.Group();
-lidGroup.position.set(0, 0.12, -3.6);
-const lidBack = new THREE.Mesh(new THREE.BoxGeometry(10.5, 7.0, 0.2), new THREE.MeshStandardMaterial({ color: "#25203D", metalness: 0.8, roughness: 0.25 }));
-lidBack.position.set(0, 3.5, 0); lidGroup.add(lidBack);
-const screenTexture = new THREE.CanvasTexture(sCanvas);
-const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(9.8, 6.2), new THREE.MeshBasicMaterial({ map: screenTexture }));
-screenMesh.position.set(0, 3.5, 0.12); lidGroup.add(screenMesh);
-lidGroup.rotation.x = 0.18;
-const laptopGroup = new THREE.Group();
-laptopGroup.add(laptopBase, lidGroup);
-scene5Group.add(laptopGroup);
-
-// Synchronized 3D Timeline and Camera Motion
-function update3DCinema(t) {
-  pSys.rotation.y = t * 0.04;
-  floatingBooks.forEach((fb, idx) => {
-    fb.mesh.rotation.x += fb.rx;
-    fb.mesh.rotation.y += fb.ry;
-    fb.mesh.position.y = fb.fy + Math.sin(t * fb.sp + idx) * 0.35;
-  });
-  cardMust.rotation.y = Math.sin(t * 1.5) * 0.15;
-  cardShould.rotation.y = Math.sin(t * 1.5 + 1) * 0.15;
-  cardSkip.rotation.y = Math.sin(t * 1.5 + 2) * 0.15;
-  ring.rotation.z = t * 0.4;
-  bulb.position.y = 2.2 + Math.sin(t * 2.5) * 0.18;
-  conceptPrism.rotation.x = t * 0.8; conceptPrism.rotation.y = t * 0.6;
-  mcBlock.rotation.x = t * 0.5; mcBlock.rotation.y = t * 0.7;
-
-  // Camera paths across the 5 Scenes
-  let activeScene = 1;
-  if (t < 5.0) {
-    activeScene = 1;
-    const p = t / 5.0;
-    camera.position.x = THREE.MathUtils.lerp(0.8, -1.2, p);
-    camera.position.y = THREE.MathUtils.lerp(2.8, 1.8, p);
-    camera.position.z = THREE.MathUtils.lerp(12.0, 4.0, p);
-    camera.lookAt(0, 1.2, -2);
-  } else if (t < 10.0) {
-    activeScene = 2;
-    const p = (t - 5.0) / 5.0;
-    camera.position.x = THREE.MathUtils.lerp(-1.2, 2.0, p);
-    camera.position.y = THREE.MathUtils.lerp(1.8, 3.2, p);
-    camera.position.z = THREE.MathUtils.lerp(4.0, -16.0, p);
-    camera.lookAt(0, 1.0, -22);
-  } else if (t < 15.0) {
-    activeScene = 3;
-    const p = (t - 10.0) / 5.0;
-    camera.position.x = THREE.MathUtils.lerp(2.0, -0.8, p);
-    camera.position.y = THREE.MathUtils.lerp(3.2, 2.2, p);
-    camera.position.z = THREE.MathUtils.lerp(-16.0, -38.0, p);
-    camera.lookAt(0, 1.4, -44);
-  } else if (t < 20.0) {
-    activeScene = 4;
-    const p = (t - 15.0) / 5.0;
-    camera.position.x = THREE.MathUtils.lerp(-0.8, 1.5, p);
-    camera.position.y = THREE.MathUtils.lerp(2.2, 2.8, p);
-    camera.position.z = THREE.MathUtils.lerp(-38.0, -60.0, p);
-    camera.lookAt(0, 1.6, -66);
-  } else {
-    activeScene = 5;
-    const p = (t - 20.0) / 5.0;
-    const easeP = p * p;
-    camera.position.x = 0;
-    camera.position.y = THREE.MathUtils.lerp(2.6, 3.65, p);
-    camera.position.z = THREE.MathUtils.lerp(-74.0, -84.15, easeP);
-    camera.lookAt(0, 3.65, -88);
-  }
-
-  // Update text blocks & scene pills
-  for (let i = 1; i <= 5; i++) {
-    const el = document.getElementById("textScene" + i);
-    if (el) el.classList.toggle("active", i === activeScene);
-  }
-  document.querySelectorAll(".scene-pill").forEach((pill, idx) => {
-    pill.classList.toggle("active", (idx + 1) === activeScene);
-  });
-}
-
-// Render Animation Loop
-let lastFrameTime = performance.now();
-function renderHero3D(now) {
-  requestAnimationFrame(renderHero3D);
-
-  // If user has scrolled into the app, pause WebGL loop to save 100% GPU
-  if (scrollY > innerHeight * 1.2) return;
-
-  const dt = (now - lastFrameTime) / 1000;
-  lastFrameTime = now;
-
-  if (isHeroPlaying) {
-    heroTime += dt;
-    if (heroTime >= TOTAL_DURATION) {
-      heroTime = TOTAL_DURATION;
-      isHeroPlaying = false;
-      document.getElementById("btnHudPlay").textContent = "▶ Play";
-    }
-  }
-
-  update3DCinema(heroTime);
-  renderer.render(scene, camera);
-
-  // Update HUD
-  const pct = (heroTime / TOTAL_DURATION) * 100;
-  document.getElementById("hudProgress").style.width = pct + "%";
-  const sec = Math.floor(heroTime);
-  const ms = Math.floor((heroTime % 1) * 10);
-  document.getElementById("hudTime").textContent = `00:${sec < 10 ? '0' : ''}${sec}.${ms} / 00:25`;
-}
-requestAnimationFrame(renderHero3D);
-
-// HUD & Pill Controls
-document.getElementById("btnHudPlay").onclick = () => {
-  isHeroPlaying = !isHeroPlaying;
-  document.getElementById("btnHudPlay").textContent = isHeroPlaying ? "⏸ Pause" : "▶ Play";
-};
-document.getElementById("btnHudReplay").onclick = () => {
-  heroTime = 0;
-  isHeroPlaying = true;
-  document.getElementById("btnHudPlay").textContent = "⏸ Pause";
-};
-document.querySelectorAll(".scene-pill").forEach(pill => {
-  pill.onclick = () => {
-    heroTime = parseFloat(pill.dataset.jump);
-    isHeroPlaying = true;
-    document.getElementById("btnHudPlay").textContent = "⏸ Pause";
-  };
-});
-document.getElementById("hudTrack").onclick = (e) => {
-  const r = e.currentTarget.getBoundingClientRect();
-  heroTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * TOTAL_DURATION;
-};
-
-// Transition into the working app dashboard
-function glideIntoApp() {
-  document.getElementById("app").scrollIntoView({ behavior: "smooth" });
-}
-document.getElementById("btnSkipToApp").onclick = glideIntoApp;
-document.getElementById("btnHudScrollDown").onclick = glideIntoApp;
-document.getElementById("btnHeroLetsGetStarted").onclick = glideIntoApp;
-
-// Return to 3D Intro from app sidebar
-document.getElementById("introStoryBtn").onclick = () => {
-  heroTime = 0;
-  isHeroPlaying = true;
-  document.getElementById("btnHudPlay").textContent = "⏸ Pause";
-  document.getElementById("hero3DSection").scrollIntoView({ behavior: "smooth" });
-  document.getElementById("side").classList.remove("open");
-};
-
-// Resize
-window.addEventListener("resize", () => {
-  const w = heroCanvas.clientWidth || innerWidth;
-  const h = heroCanvas.clientHeight || innerHeight;
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
-});
-</script>
-
-<script>
-/* ==========================================================================
-   ORIGINAL AI STUDY TOOL SCRIPT & LOGIC (BIGBRAINN’T)
-   ========================================================================== */
-const $ = (i) => document.getElementById(i);
-const INT = ["Minecraft", "Gossip", "Cricket", "K-pop", "Free Fire", "Anime"];
-const LV = [["weak", "Behind"], ["average", "Okay"], ["strong", "Strong"]];
-const S = { interest: "", pd: 4, lv: "average", img: "", imgUrl: "" };
-
-const SB = (window.SB_CONFIG && typeof window.SB_CONFIG === "object") ? window.SB_CONFIG : { url: "", key: "" };
-let hist = [];
-try { hist = JSON.parse(localStorage.getItem("tz3") || "[]"); } catch (e) {}
-const save = () => { try { localStorage.setItem("tz3", JSON.stringify(hist.slice(0, 20))); } catch (e) {} };
-
-const H = { sub: "Maths", sty: "Step-by-step", img: "", imgUrl: "" };
-const SUBS = ["Maths", "Science", "Physics", "Chemistry", "Biology", "English", "Hindi", "Social Science", "Computer", "Other"];
-const STY = ["Step-by-step", "Short answers", "Long answers (5 marks)", "Like my textbook"];
-let conv = [], cur = null, LT = null;
-
-const LOAD = {
-  story: ["Asking the topper in my head…", "Hunting for a good example…", "Making it less boring…", "Almost there, promise 🤞"],
-  rush: ["Counting your remaining hours…", "Deciding what you can safely skip 😅", "Building your game plan…", "Almost there, hang tight 🤞"],
-  homework: ["Squinting at your handwriting 🧐", "Solving it step by step…", "Double-checking every answer…", "Almost there, pen down soon ✍️"],
-  chat: ["Thinking about that…", "Connecting it to what we covered…", "Almost there…"]
-};
-
-function stopLoad() { if (LT) { clearInterval(LT); LT = null; } }
-const esc = (s) => String(s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const inl = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
-const cell = (s) => {
-  const t = s.trim().toLowerCase().replace(/\*/g, "");
-  const m = /^(must|should|skip)$/.exec(t);
-  return m ? `<span class="tag t-${m[1]}">${t[0].toUpperCase() + t.slice(1)}</span>` : inl(s.trim());
-};
-
-function md(src) {
-  let o = "", l = false, t = [];
-  const cl = () => { if (l) { o += "</ul>"; l = false; } };
-  const ft = () => {
-    if (!t.length) return;
-    const r = t.filter(x => !/^\s*\|?[\s:-]+(\|[\s:-]+)*\|?\s*$/.test(x))
-      .map(x => x.trim().replace(/^\||\|$/g, "").split("|").map(cell));
-    o += '<div class="tw"><table>' + r.map((x, i) => "<tr>" + x.map(c => i ? `<td>${c}</td>` : `<th>${c}</th>`).join("") + "</tr>").join("") + "</table></div>";
-    t = [];
-  };
-
-  for (const raw of src.split("\n")) {
-    const line = raw.trimEnd();
-    if (/^\s*\|/.test(line)) { cl(); t.push(line); continue; } else ft();
-    if (/^#{1,4}\s/.test(line)) { cl(); o += "<h2>" + inl(line.replace(/^#{1,4}\s/, "")) + "</h2>"; }
-    else if (/^\s*[-*•]\s+/.test(line)) { if (!l) { o += "<ul>"; l = true; } o += "<li>" + inl(line.replace(/^\s*[-*•]\s+/, "")) + "</li>"; }
-    else if (/^\s*-{3,}\s*$/.test(line)) { cl(); o += "<hr>"; }
-    else if (!line.trim()) cl();
-    else { cl(); o += "<p>" + inl(line) + "</p>"; }
-  }
-  cl(); ft(); return o;
-}
-
-function chips(box, items, on, pick, fmt) {
-  box.innerHTML = "";
-  items.forEach(v => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "chip";
-    b.textContent = fmt ? fmt(v) : v;
-    b.setAttribute("aria-pressed", on(v));
-    b.onclick = () => { pick(v); drawChips(); };
-    box.appendChild(b);
-  });
-}
-
-function drawChips() {
-  chips($("ichips"), INT, v => v === S.interest, v => { S.interest = S.interest === v ? "" : v; $("interest").value = S.interest; });
-  chips($("pdChips"), [2, 4, 6, 8, 10], v => v === S.pd, v => S.pd = v, v => v + " hrs");
-  chips($("lvChips"), LV, v => v[0] === S.lv, v => S.lv = v[0], v => v[1]);
-  chips($("subChips"), SUBS, v => v === H.sub, v => H.sub = v);
-  chips($("styChips"), STY, v => v === H.sty, v => H.sty = v);
-  $("pdBox").hidden = $("examUnit").value !== "days";
-}
-
-function drawHist() {
-  const h = $("hist");
-  h.innerHTML = hist.length ? '<div class="hl">Recent</div>' : '<div class="hl">Your chats will show here</div>';
-  hist.forEach(e => {
-    const b = document.createElement("button");
-    b.className = "hi";
-    b.textContent = e.title;
-    b.title = e.title;
-    b.onclick = () => { openChat(e); $("side").classList.remove("open"); };
-    h.appendChild(b);
-  });
-}
-
-function place(home) {
-  (home ? $("homeSlot") : $("dockSlot")).appendChild($("dock"));
-  $("app").classList.toggle("chat", !home);
-  $("empty").querySelectorAll(".orb, h1, .intro").forEach(n => n.hidden = !home);
-}
-
-function newChat() {
-  $("thread").innerHTML = "";
-  conv = [];
-  cur = null;
-  stopLoad();
-  place(true);
-  $("side").classList.remove("open");
-  $("q").focus();
-}
-
-function addUser(t, img) {
-  const d = document.createElement("div");
-  d.className = "u";
-  d.innerHTML = '<div class="av">You</div><div><p>' + esc(t) + '</p>' + (img ? '<img class="uimg" alt="Your photo" src="' + img + '">' : "") + '</div>';
-  $("thread").appendChild(d);
-}
-
-function addBot(kind, quiet) {
-  const m = LOAD[kind] || LOAD.story;
-  const d = document.createElement("div");
-  d.innerHTML = '<div class="u"><div class="av b"></div><span class="muted">BigBrainn’t</span></div><div class="answer"><div class="ld"><span class="o"></span><span class="lm">' + m[0] + '</span></div></div>';
-  $("thread").appendChild(d);
-  const box = d.querySelector(".answer");
-  if (quiet) return box;
-  d.scrollIntoView({ behavior: "smooth", block: "start" });
-  stopLoad();
-  let i = 0;
-  LT = setInterval(() => {
-    const el = box.querySelector(".lm");
-    if (!el) { stopLoad(); return; }
-    i = (i + 1) % m.length;
-    el.classList.add("sw");
-    setTimeout(() => { el.textContent = m[i]; el.classList.remove("sw"); }, 250);
-  }, 2400);
-  return box;
-}
-
-function fill(box, t) {
-  stopLoad();
-  box.innerHTML = md(t) + '<div class="tools"><button class="cp">Copy</button><button class="pr">Print or save PDF</button></div>';
-  box.querySelector(".cp").onclick = async (e) => {
-    try {
-      await navigator.clipboard.writeText(t);
-      e.target.textContent = "Copied";
-    } catch (x) {
-      e.target.textContent = "Copy failed";
-    }
-  };
-  box.querySelector(".pr").onclick = () => window.print();
-}
-
-function openChat(e) {
-  $("thread").innerHTML = "";
-  place(false);
-  stopLoad();
-  const ms = e.msgs || [{ r: "u", t: e.title, l: e.title }, { r: "m", t: e.text }];
-  conv = ms.slice();
-  cur = e;
-  ms.forEach(m => {
-    if (m.r === "u") addUser(m.l || m.t);
-    else fill(addBot("story", true), m.t);
-  });
-}
-
-function getSimulatedFallback(p) {
-  if (p.mode === "rush") {
-    return `## Reality check\nYou have ${p.examVal} ${p.examUnit} left. With strategic prioritization, covering all core concepts and securing high marks is 100% achievable.\n\n## Priority map\n| Topic | Priority | Time | Why |\n|---|---|---|---|\n| Core Formulas & High-yield Units | Must | 2.5 hrs | 40% of standard questions stem directly from here |\n| 5-Mark Numericals | Must | 2.0 hrs | Guaranteed test points |\n| Conceptual Practice | Should | 1.5 hrs | Speed and precision training |\n| Lengthy historical derivations | Skip | 0 hrs | Negligible exam appearance |\n\n## Your timeline\n| When | What to do | Goal |\n|---|---|---|\n| Block 1 | Solve core formula drills | Lock in guaranteed marks |\n| Breather | Water, chai & reset | Prevent mental fatigue |\n| Block 2 | Practice past paper questions | Solidify exam readiness |`;
-  }
-  if (p.mode === "homework") {
-    return `## Step-by-step Solution (${p.subject})\n\n### Step 1: Given Information\nList known values and identify exactly what needs solving.\n\n### Step 2: The Core Working\nApply the governing formula in ${p.style} format:\n- Formula: State clearly.\n- Calculation: Substitute values step by step.\n- **Answer:** Verified and clean.\n\n### Why:\nThis problem relies on conservation principles rather than blind number memorization.\n\n## Quick check\n- Verify units.\n- Check arithmetic signs.`;
-  }
-  return `## In simple words\n${p.topic || "This topic"} works like a connected system where inputs cleanly transform into outputs.\n\n## Example\nThink of it like charging your phone—stored electrical potential transforming into bright display output!\n\n## Exam-ready version\nDefine it as: *"The fundamental process through which given states undergo transformation to produce measurable outputs."*\n\n## Test yourself\n1. What is the main input?\n2. Why does the transformation work?`;
-}
-
-async function ask(p, title, img, ctx) {
-  const follow = p.mode === "chat", k = (p.image || follow) ? "x" + Date.now() : JSON.stringify(p).toLowerCase();
-  if (!follow && !p.image) {
-    const f = hist.find(h => h.k === k);
-    if (f) { openChat(f); return; }
-  }
-  if (follow) p.history = conv.slice(-10);
-  else { $("thread").innerHTML = ""; conv = []; cur = null; }
-
-  place(false);
-  addUser(title, img);
-  const box = addBot(ctx.kind);
-  $("send").disabled = true;
-
-  try {
-    const r = await fetch("/api/explain", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(p)
-    });
-    const ct = r.headers.get("content-type") || "";
-    let t = "";
-
-    if (r.ok && ct.includes("text/plain")) {
-      const rd = r.body.getReader(), dc = new TextDecoder();
-      for (;;) {
-        const { done, value } = await rd.read();
-        if (done) break;
-        t += dc.decode(value, { stream: true });
-        box.innerHTML = md(t) + '<p class="muted"><span class="pulse"></span></p>';
-      }
-      t += dc.decode();
-      if (!t.trim()) throw new Error("No answer came back. Try again.");
-    } else {
-      t = getSimulatedFallback(p);
-    }
-
-    conv.push({ r: "u", t: ctx.user, l: title }, { r: "m", t });
-    if (follow) {
-      if (cur) { cur.msgs = conv.slice(); save(); }
-    } else {
-      cur = { k, title, text: t, msgs: conv.slice() };
-      hist.unshift(cur);
-      save();
-      drawHist();
-      if (user && sb) sb.from("chats").insert({ k, title, text: t }).then(() => {}, () => {});
-    }
-    fill(box, t);
-  } catch (e) {
-    const t = getSimulatedFallback(p);
-    conv.push({ r: "u", t: ctx.user, l: title }, { r: "m", t });
-    cur = { k, title, text: t, msgs: conv.slice() };
-    hist.unshift(cur);
-    save();
-    drawHist();
-    fill(box, t);
-  } finally {
-    $("send").disabled = false;
-  }
-}
-
-function send() {
-  const q = $("q").value.trim();
-  if (!q && !S.img) { $("q").focus(); return; }
-  const i = $("interest").value.trim();
-  S.interest = i;
-  const follow = conv.length > 0;
-  const p = { mode: follow ? "chat" : "story", topic: q, interest: i, lang: $("lang").value };
-  if (S.img) { p.image = S.img; p.imgMime = "image/jpeg"; }
-  ask(p, (S.img ? "📷 " : "") + (q || "Photo question") + (i ? " · in " + i : ""), S.imgUrl, {
-    kind: follow ? "chat" : "story",
-    user: (q || "[photo question]") + (i ? " (use " + i + " for examples)" : "")
-  });
-  $("q").value = "";
-  $("q").style.height = "auto";
-  clearImg();
-  drawChips();
-}
-
-function drawPv() {
-  const v = $("pv");
-  v.hidden = !S.imgUrl;
-  v.innerHTML = S.imgUrl ? '<span class="pvi"><img alt="Photo to send" src="' + S.imgUrl + '"><button aria-label="Remove photo" id="rmImg">✕</button></span>' : "";
-  if (S.imgUrl) $("rmImg").onclick = clearImg;
-}
-
-function clearImg() {
-  S.img = "";
-  S.imgUrl = "";
-  $("file").value = "";
-  drawPv();
-}
-
-function pickImage(f, cb) {
-  if (!f) return;
-  const im = new Image(), u = URL.createObjectURL(f);
-  im.onload = () => {
-    const sc = Math.min(1, 1280 / Math.max(im.width, im.height));
-    const c = document.createElement("canvas");
-    c.width = Math.round(im.width * sc);
-    c.height = Math.round(im.height * sc);
-    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
-    const url = c.toDataURL("image/jpeg", 0.8);
-    URL.revokeObjectURL(u);
-    cb(url);
-  };
-  im.onerror = () => {
-    URL.revokeObjectURL(u);
-    alert("Could not read that photo. Try a JPG or PNG.");
-  };
-  im.src = u;
-}
-
-$("cam").onclick = () => $("file").click();
-$("file").onchange = (e) => pickImage(e.target.files[0], url => {
-  S.imgUrl = url;
-  S.img = url.split(",")[1];
-  drawPv();
-});
-
-try { $("lang").value = localStorage.getItem("tzl") || "auto"; } catch (e) {}
-$("lang").onchange = () => { try { localStorage.setItem("tzl", $("lang").value); } catch (e) {} };
-$("send").onclick = send;
-$("q").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
-$("q").addEventListener("input", e => { e.target.style.height = "auto"; e.target.style.height = e.target.scrollHeight + "px"; });
-$("interest").oninput = (e) => { S.interest = e.target.value; drawChips(); };
-$("vibeCard").onclick = () => $("interest").focus();
-
-$("rushCard").onclick = () => { $("rerr").hidden = true; $("rushDlg").showModal(); };
-$("rCancel").onclick = () => $("rushDlg").close();
-$("examUnit").onchange = drawChips;
-$("rGo").onclick = () => {
-  const p = {
-    mode: "rush",
-    lang: $("lang").value,
-    topic: $("subject").value.trim(),
-    examVal: $("examVal").value,
-    examUnit: $("examUnit").value,
-    perDay: S.pd,
-    syllabus: $("syllabus").value.trim(),
-    level: S.lv
-  };
-  const bad = !p.topic ? "Add your subject first." : !(+p.examVal > 0) ? "How much time is left?" : !p.syllabus ? "Tell me what syllabus is left. A rough note is fine." : "";
-  if (bad) { $("rerr").textContent = bad; $("rerr").hidden = false; return; }
-  $("rushDlg").close();
-  ask(p, "🗺️ Exam Game Plan: " + p.topic + ", " + p.examVal + " " + p.examUnit + " left", null, {
-    kind: "rush",
-    user: "Exam plan request. Subject: " + p.topic + "; time left: " + p.examVal + " " + p.examUnit + "; syllabus: " + p.syllabus.slice(0, 500)
-  });
-};
-
-$("aboutBtn").onclick = () => { $("side").classList.remove("open"); $("aboutDlg").showModal(); };
-$("aClose").onclick = () => $("aboutDlg").close();
-$("newChat").onclick = newChat;
-$("menu").onclick = () => $("side").classList.toggle("open");
-
-// Homework Helper
-function drawHpv() {
-  const v = $("hwPv");
-  v.innerHTML = H.imgUrl ? '<span class="pvi"><img alt="Homework photo" src="' + H.imgUrl + '"><button aria-label="Remove photo" id="rmH">✕</button></span>' : "";
-  if (H.imgUrl) $("rmH").onclick = () => { H.img = ""; H.imgUrl = ""; $("hwFile").value = ""; drawHpv(); };
-}
-$("hwCard").onclick = () => { $("hwerr").hidden = true; $("hwDlg").showModal(); };
-$("hwCancel").onclick = () => $("hwDlg").close();
-$("hwCam").onclick = () => $("hwFile").click();
-$("hwFile").onchange = (e) => pickImage(e.target.files[0], url => { H.imgUrl = url; H.img = url.split(",")[1]; drawHpv(); });
-$("hwGo").onclick = () => {
-  const txt = $("hwText").value.trim();
-  if (!txt && !H.img) { $("hwerr").textContent = "Add a photo of the homework, or type it in."; $("hwerr").hidden = false; return; }
-  const p = { mode: "homework", topic: txt, subject: H.sub, style: H.sty, notes: $("hwNote").value.trim(), lang: $("lang").value };
-  if (H.img) { p.image = H.img; p.imgMime = "image/jpeg"; }
-  const shot = H.imgUrl;
-  $("hwDlg").close();
-  ask(p, "📚 " + H.sub + ": " + (txt ? txt.slice(0, 70) : "Photo homework"), shot, {
-    kind: "homework",
-    user: "Homework (" + H.sub + ", " + H.sty + "): " + (txt || "[photo of homework]")
-  });
-  H.img = ""; H.imgUrl = ""; drawHpv(); $("hwText").value = ""; $("hwNote").value = "";
-};
-
-// Auth (Supabase)
-let sb = null, user = null, signup = false;
-const acctLabel = () => { $("loginBtn").textContent = user ? "👤 " + user.email + " · Log out" : "Log in / Sign up"; };
-async function pull() {
-  try {
-    const { data } = await sb.from("chats").select("k,title,text").order("created_at", { ascending: false }).limit(20);
-    if (data) {
-      const seen = new Set();
-      hist = [...data, ...hist].filter(h => !seen.has(h.k) && seen.add(h.k)).slice(0, 20);
-      save();
-      drawHist();
-    }
-  } catch (e) {}
-}
-async function setUser(u) {
-  const ch = (u && u.id) !== (user && user.id);
-  user = u;
-  acctLabel();
-  if (u && ch) await pull();
-}
-async function initAuth() {
-  if (!SB.url || !SB.key) return;
-  $("acct").hidden = false;
-  await new Promise((ok) => {
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";
-    s.onload = ok;
-    s.onerror = ok;
-    document.head.appendChild(s);
-  });
-  if (!window.supabase) return;
-  sb = supabase.createClient(SB.url, SB.key);
-  const { data } = await sb.auth.getSession();
-  setUser(data.session ? data.session.user : null);
-  sb.auth.onAuthStateChange((_e, s) => setUser(s ? s.user : null));
-}
-const aerr = (m) => { $("aerr").textContent = m; $("aerr").hidden = !m; };
-function authMode() {
-  $("aT").textContent = signup ? "Create your account" : "Welcome back";
-  $("aGo").textContent = signup ? "Sign up" : "Log in";
-  $("aSw").textContent = signup ? "Have an account? Log in" : "New here? Create an account";
-  aerr("");
-}
-$("loginBtn").onclick = () => {
-  $("side").classList.remove("open");
-  if (user && sb) { sb.auth.signOut(); return; }
-  signup = false;
-  authMode();
-  $("authDlg").showModal();
-};
-$("aSw").onclick = (e) => { e.preventDefault(); signup = !signup; authMode(); };
-$("aCancel").onclick = () => $("authDlg").close();
-$("aGo").onclick = async () => {
-  if (!sb) return aerr("Login is not ready. Try again in a moment.");
-  const email = $("em").value.trim(), password = $("pw").value;
-  if (!email || password.length < 6) return aerr("Enter your email and a password with 6 or more characters.");
-  const r = signup ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
-  if (r.error) return aerr(r.error.message);
-  if (signup && !r.data.session) return aerr("Check your email to confirm your account, then log in.");
-  $("authDlg").close();
-};
-
-drawChips();
-drawHist();
-place(true);
-try { initAuth().catch(() => {}); } catch (e) {}
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-}
+const $=(i)=>document.getElementById(i);
+const INT=["Minecraft","Gossip","Cricket","K-pop","Free Fire","Anime"],LV=[["weak","Behind"],["average","Okay"],["strong","Strong"]];
+const S={interest:"",pd:4,lv:"average",img:"",imgUrl:""};
+// Login keys now live in config.js (see SUPABASE_SETUP.txt). If config.js is missing or broken, the app still works.
+const SB=(window.SB_CONFIG&&typeof window.SB_CONFIG==="object")?window.SB_CONFIG:{url:"",key:""};
+let hist=[];try{hist=JSON.parse(localStorage.getItem("tz3")||"[]")}catch(e){}
+const save=()=>{try{localStorage.setItem("tz3",JSON.stringify(hist.slice(0,20)))}catch(e){}};
+
+const H={sub:"Maths",sty:"Step-by-step",img:"",imgUrl:""};
+const SUBS=["Maths","Science","Physics","Chemistry","Biology","English","Hindi","Social Science","Computer","Other"],STY=["Step-by-step","Short answers","Long answers (5 marks)","Like my textbook"];
+let conv=[],cur=null,LT=null;
+const LOAD={story:["Asking the topper in my head…","Hunting for a good example…","Making it less boring…","Almost there, promise 🤞"],
+ rush:["Counting your remaining hours…","Deciding what you can safely skip 😅","Building your game plan…","Almost there, hang tight 🤞"],
+ homework:["Squinting at your handwriting 🧐","Solving it step by step…","Double-checking every answer…","Almost there, pen down soon ✍️"],
+ chat:["Thinking about that…","Connecting it to what we covered…","Almost there…"]};
+function stopLoad(){if(LT){clearInterval(LT);LT=null}}
+const esc=(s)=>s.replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inl=(s)=>esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");
+const cell=(s)=>{const t=s.trim().toLowerCase().replace(/\*/g,""),m=/^(must|should|skip)$/.exec(t);return m?`<span class="tag t-${m[1]}">${t[0].toUpperCase()+t.slice(1)}</span>`:inl(s.trim())};
+function md(src){let o="",l=false,t=[];const cl=()=>{if(l){o+="</ul>";l=false}};
+ const ft=()=>{if(!t.length)return;const r=t.filter(x=>!/^\s*\|?[\s:-]+(\|[\s:-]+)*\|?\s*$/.test(x)).map(x=>x.trim().replace(/^\||\|$/g,"").split("|").map(cell));
+  o+='<div class="tw"><table>'+r.map((x,i)=>"<tr>"+x.map(c=>i?`<td>${c}</td>`:`<th>${c}</th>`).join("")+"</tr>").join("")+"</table></div>";t=[]};
+ for(const raw of src.split("\n")){const x=raw.trimEnd();
+  if(/^\s*\|/.test(x)){cl();t.push(x);continue}else ft();
+  if(/^#{1,4}\s/.test(x)){cl();o+="<h2>"+inl(x.replace(/^#{1,4}\s/,""))+"</h2>"}
+  else if(/^\s*[-*•]\s+/.test(x)){if(!l){o+="<ul>";l=true}o+="<li>"+inl(x.replace(/^\s*[-*•]\s+/,""))+"</li>"}
+  else if(/^\s*-{3,}\s*$/.test(x)){cl();o+="<hr>"}
+  else if(!x.trim())cl();else{cl();o+="<p>"+inl(x)+"</p>"}}
+ cl();ft();return o}
+
+function chips(box,items,on,pick,fmt){box.innerHTML="";items.forEach(v=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=fmt?fmt(v):v;b.setAttribute("aria-pressed",on(v));b.onclick=()=>{pick(v);drawChips()};box.appendChild(b)})}
+function drawChips(){
+ chips($("ichips"),INT,v=>v===S.interest,v=>{S.interest=S.interest===v?"":v;$("interest").value=S.interest});
+ chips($("pdChips"),[2,4,6,8,10],v=>v===S.pd,v=>S.pd=v,v=>v+" hrs");
+ chips($("lvChips"),LV,v=>v[0]===S.lv,v=>S.lv=v[0],v=>v[1]);
+ chips($("subChips"),SUBS,v=>v===H.sub,v=>H.sub=v);
+ chips($("styChips"),STY,v=>v===H.sty,v=>H.sty=v);
+ $("pdBox").hidden=$("examUnit").value!=="days"}
+function drawHist(){const h=$("hist");h.innerHTML=hist.length?'<div class="hl">Recent</div>':'<div class="hl">Your chats will show here</div>';
+ hist.forEach((e,i)=>{const b=document.createElement("button");b.className="hi";b.textContent=e.title;b.title=e.title;b.onclick=()=>{open(e);$("side").classList.remove("open")};h.appendChild(b)})}
+
+function place(home){if(!home&&!document.body.classList.contains("inchat")){document.body.classList.add("inchat");scrollTo(0,0)}(home?$("homeSlot"):$("dockSlot")).appendChild($("dock"));$("app").classList.toggle("chat",!home);$("empty").querySelectorAll(".orb,h1,.intro").forEach(n=>n.hidden=!home)}
+function newChat(){$("thread").innerHTML="";conv=[];cur=null;stopLoad();place(true);$("side").classList.remove("open");$("q").focus()}
+function addUser(t,img){const d=document.createElement("div");d.className="u";d.innerHTML='<div class="av">You</div><div><p>'+esc(t)+'</p>'+(img?'<img class="uimg" alt="Your photo" src="'+img+'">':"")+'</div>';$("thread").appendChild(d)}
+function addBot(kind,quiet){const m=LOAD[kind]||LOAD.story,d=document.createElement("div");
+ d.innerHTML='<div class="u"><div class="av b"></div><span class="muted">BigBrainn’t</span></div><div class="answer"><div class="ld"><span class="o"></span><span class="lm">'+m[0]+'</span></div></div>';
+ $("thread").appendChild(d);const box=d.querySelector(".answer");if(quiet)return box;
+ d.scrollIntoView({behavior:"smooth",block:"start"});stopLoad();let i=0;
+ LT=setInterval(()=>{const el=box.querySelector(".lm");if(!el){stopLoad();return}i=(i+1)%m.length;el.classList.add("sw");setTimeout(()=>{el.textContent=m[i];el.classList.remove("sw")},250)},2400);return box}
+function fill(box,t){stopLoad();box.innerHTML=md(t)+'<div class="tools"><button class="cp">Copy</button><button class="pr">Print or save PDF</button></div>';
+ box.querySelector(".cp").onclick=async(e)=>{try{await navigator.clipboard.writeText(t);e.target.textContent="Copied"}catch(x){e.target.textContent="Copy failed"}};
+ box.querySelector(".pr").onclick=()=>window.print()}
+function open(e){$("thread").innerHTML="";place(false);stopLoad();const ms=e.msgs||[{r:"u",t:e.title,l:e.title},{r:"m",t:e.text}];conv=ms.slice();cur=e;
+ ms.forEach(m=>{if(m.r==="u")addUser(m.l||m.t);else fill(addBot("story",true),m.t)})}
+
+async function ask(p,title,img,ctx){
+ const follow=p.mode==="chat",k=(p.image||follow)?"x"+Date.now():JSON.stringify(p).toLowerCase();
+ if(!follow&&!p.image){const f=hist.find(h=>h.k===k);if(f){open(f);return}}
+ if(follow)p.history=conv.slice(-10);else{$("thread").innerHTML="";conv=[];cur=null}
+ place(false);addUser(title,img);const box=addBot(ctx.kind);
+ $("send").disabled=true;
+ try{const r=await fetch("/api/explain",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+  const ct=r.headers.get("content-type")||"";let t="";
+  if(r.ok&&ct.includes("text/plain")){
+   const rd=r.body.getReader(),dc=new TextDecoder();
+   for(;;){const {done,value}=await rd.read();if(done)break;t+=dc.decode(value,{stream:true});box.innerHTML=md(t)+'<p class="muted"><span class="pulse"></span></p>'}
+   t+=dc.decode();if(!t.trim())throw new Error("No answer came back. Try again.")
+  }else{
+   const raw=await r.text();let d;try{d=JSON.parse(raw)}catch(e){d={error:r.status===413?"That photo is too big. Try a smaller or cropped photo.":"The server had a problem (code "+r.status+"). Wait a few seconds and try again. If it keeps happening, check the Logs tab in Vercel."}}
+   if(!r.ok||!d.text)throw new Error(d.error||"Something went wrong.");t=d.text}
+  conv.push({r:"u",t:ctx.user,l:title},{r:"m",t});
+  if(follow){if(cur){cur.msgs=conv.slice();save()}}
+  else{cur={k,title,text:t,msgs:conv.slice()};hist.unshift(cur);save();drawHist();if(user&&sb)sb.from("chats").insert({k,title,text:t}).then(()=>{},()=>{})}
+  fill(box,t)}
+ catch(e){stopLoad();box.innerHTML='<p class="err">'+esc(e.message||"Could not reach the server. Check your internet.")+'</p>'}
+ finally{$("send").disabled=false}}
+
+function send(){const q=$("q").value.trim();if(!q&&!S.img){$("q").focus();return}
+ const i=$("interest").value.trim();S.interest=i;const follow=conv.length>0;
+ const p={mode:follow?"chat":"story",topic:q,interest:i,lang:$("lang").value};
+ if(S.img){p.image=S.img;p.imgMime="image/jpeg"}
+ ask(p,(S.img?"📷 ":"")+(q||"Photo question")+(i?"  ·  in "+i:""),S.imgUrl,{kind:follow?"chat":"story",user:(q||"[photo question]")+(i?" (use "+i+" for examples)":"")});
+ $("q").value="";$("q").style.height="auto";clearImg();drawChips()}
+function drawPv(){const v=$("pv");v.hidden=!S.imgUrl;v.innerHTML=S.imgUrl?'<span class="pvi"><img alt="Photo to send" src="'+S.imgUrl+'"><button aria-label="Remove photo" id="rmImg">✕</button></span>':"";if(S.imgUrl)$("rmImg").onclick=clearImg}
+function clearImg(){S.img="";S.imgUrl="";$("file").value="";drawPv()}
+function pickImage(f,cb){if(!f)return;const im=new Image(),u=URL.createObjectURL(f);
+ im.onload=()=>{const sc=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+  c.getContext("2d").drawImage(im,0,0,c.width,c.height);const url=c.toDataURL("image/jpeg",.8);URL.revokeObjectURL(u);cb(url)};
+ im.onerror=()=>{URL.revokeObjectURL(u);alert("Could not read that photo. Try a JPG or PNG.")};im.src=u}
+$("cam").onclick=()=>$("file").click();$("file").onchange=(e)=>pickImage(e.target.files[0],url=>{S.imgUrl=url;S.img=url.split(",")[1];drawPv()});
+try{$("lang").value=localStorage.getItem("tzl")||"auto"}catch(e){}
+$("lang").onchange=()=>{try{localStorage.setItem("tzl",$("lang").value)}catch(e){}}
+$("send").onclick=send;
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
+$("q").addEventListener("input",e=>{e.target.style.height="auto";e.target.style.height=e.target.scrollHeight+"px"});
+$("interest").oninput=(e)=>{S.interest=e.target.value;drawChips()};
+$("vibeCard").onclick=()=>$("interest").focus();
+
+$("rushCard").onclick=()=>{$("rerr").hidden=true;$("rushDlg").showModal()};
+$("rCancel").onclick=()=>$("rushDlg").close();
+$("examUnit").onchange=drawChips;
+$("rGo").onclick=()=>{
+ const p={mode:"rush",lang:$("lang").value,topic:$("subject").value.trim(),examVal:$("examVal").value,examUnit:$("examUnit").value,perDay:S.pd,syllabus:$("syllabus").value.trim(),level:S.lv};
+ const bad=!p.topic?"Add your subject first.":!(+p.examVal>0)?"How much time is left?":!p.syllabus?"Tell me what syllabus is left. A rough note is fine.":"";
+ if(bad){$("rerr").textContent=bad;$("rerr").hidden=false;return}
+ $("rushDlg").close();
+ ask(p,"🗺️ Exam Game Plan: "+p.topic+", "+p.examVal+" "+p.examUnit+" left",null,{kind:"rush",user:"Exam plan request. Subject: "+p.topic+"; time left: "+p.examVal+" "+p.examUnit+"; syllabus: "+p.syllabus.slice(0,500)})};
+$("aboutBtn").onclick=()=>{$("side").classList.remove("open");$("aboutDlg").showModal()};
+$("aClose").onclick=()=>$("aboutDlg").close();
+$("newChat").onclick=newChat;
+$("menu").onclick=()=>$("side").classList.toggle("open");
+
+// ---- login (only active when SB is filled in) ----
+let sb=null,user=null,signup=false;
+const acctLabel=()=>{$("loginBtn").textContent=user?"👤 "+user.email+" · Log out":"Log in / Sign up"};
+async function pull(){try{const {data}=await sb.from("chats").select("k,title,text").order("created_at",{ascending:false}).limit(20);
+ if(data){const seen=new Set();hist=[...data,...hist].filter(h=>!seen.has(h.k)&&seen.add(h.k)).slice(0,20);save();drawHist()}}catch(e){}}
+async function setUser(u){const ch=(u&&u.id)!==(user&&user.id);user=u;acctLabel();if(u&&ch)await pull()}
+async function initAuth(){if(!SB.url||!SB.key)return;$("acct").hidden=false;
+ await new Promise((ok)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";s.onload=ok;s.onerror=ok;document.head.appendChild(s)});
+ if(!window.supabase)return;sb=supabase.createClient(SB.url,SB.key);
+ const {data}=await sb.auth.getSession();setUser(data.session?data.session.user:null);
+ sb.auth.onAuthStateChange((_e,s)=>setUser(s?s.user:null))}
+const aerr=(m)=>{$("aerr").textContent=m;$("aerr").hidden=!m};
+function authMode(){$("aT").textContent=signup?"Create your account":"Welcome back";$("aGo").textContent=signup?"Sign up":"Log in";$("aSw").textContent=signup?"Have an account? Log in":"New here? Create an account";aerr("")}
+$("loginBtn").onclick=()=>{$("side").classList.remove("open");if(user&&sb){sb.auth.signOut();return}signup=false;authMode();$("authDlg").showModal()};
+$("aSw").onclick=(e)=>{e.preventDefault();signup=!signup;authMode()};
+$("aCancel").onclick=()=>$("authDlg").close();
+$("aGo").onclick=async()=>{if(!sb)return aerr("Login is not ready. Try again in a moment.");const email=$("em").value.trim(),password=$("pw").value;
+ if(!email||password.length<6)return aerr("Enter your email and a password with 6 or more characters.");
+ const r=signup?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
+ if(r.error)return aerr(r.error.message);
+ if(signup&&!r.data.session)return aerr("Check your email to confirm your account, then log in.");
+ $("authDlg").close()};
+
+// ---- homework helper ----
+function drawHpv(){const v=$("hwPv");v.innerHTML=H.imgUrl?'<span class="pvi"><img alt="Homework photo" src="'+H.imgUrl+'"><button aria-label="Remove photo" id="rmH">✕</button></span>':"";if(H.imgUrl)$("rmH").onclick=()=>{H.img="";H.imgUrl="";$("hwFile").value="";drawHpv()}}
+$("hwCard").onclick=()=>{$("hwerr").hidden=true;$("hwDlg").showModal()};
+$("hwCancel").onclick=()=>$("hwDlg").close();
+$("hwCam").onclick=()=>$("hwFile").click();
+$("hwFile").onchange=(e)=>pickImage(e.target.files[0],url=>{H.imgUrl=url;H.img=url.split(",")[1];drawHpv()});
+$("hwGo").onclick=()=>{const txt=$("hwText").value.trim();
+ if(!txt&&!H.img){$("hwerr").textContent="Add a photo of the homework, or type it in.";$("hwerr").hidden=false;return}
+ const p={mode:"homework",topic:txt,subject:H.sub,style:H.sty,notes:$("hwNote").value.trim(),lang:$("lang").value};
+ if(H.img){p.image=H.img;p.imgMime="image/jpeg"}
+ const shot=H.imgUrl;$("hwDlg").close();
+ ask(p,"📚 "+H.sub+": "+(txt?txt.slice(0,70):"Photo homework"),shot,{kind:"homework",user:"Homework ("+H.sub+", "+H.sty+"): "+(txt||"[photo of homework]")});
+ H.img="";H.imgUrl="";drawHpv();$("hwText").value="";$("hwNote").value=""};
+
+
+// ---- landing: parallax, reveal, go-to-tool ----
+const REDUCE=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function goTool(id){$("app").scrollIntoView({behavior:REDUCE?"auto":"smooth"});if(id)setTimeout(()=>$(id).click(),REDUCE?50:650)}
+document.querySelectorAll("#landing [data-go]").forEach(b=>b.onclick=()=>goTool(b.dataset.go));
+(function(){const sc=$("scene"),L=[...document.querySelectorAll("#scene .ly")],hero=$("hero");let tk=false;
+ const fit=()=>sc.setAttribute("preserveAspectRatio",innerWidth/innerHeight<1?"xMaxYMid slice":"xMidYMid slice");
+ const run=()=>{tk=false;const y=Math.min(scrollY,hero.offsetHeight);
+  if(!REDUCE)L.forEach(g=>g.style.transform="translate3d(0,"+(y*g.dataset.s).toFixed(1)+"px,0)");
+  document.body.classList.toggle("attool",$("app").getBoundingClientRect().top<innerHeight*.6)};
+ addEventListener("scroll",()=>{if(!tk){tk=true;requestAnimationFrame(run)}},{passive:true});
+ addEventListener("resize",fit);fit();run();
+ const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.2});
+ document.querySelectorAll(".rv").forEach(n=>io.observe(n))})();
+
+drawChips();drawHist();place(true);try{initAuth().catch(()=>{})}catch(e){}
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
