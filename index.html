@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BigBrainn’t: let the AI do the thinking</title>
 <meta name="description" content="Meet your AI study buddy that turns 'I'm cooked' into 'Wait, I actually get it.' Exam game plans, homework help, and concepts taught your way.">
-<meta name="theme-color" content="#F6F4FF">
+<meta name="theme-color" content="#09061A">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -16,10 +16,9 @@
 
 <style>
 /* ==========================================================================
-   ORIGINAL APP STYLES & DESIGN TOKENS
+   DESIGN TOKENS & RESET
    ========================================================================== */
 :root {
-  color-scheme: light;
   --bg: #F6F4FF;
   --panel: #FFFFFF;
   --card: #FFFFFF;
@@ -28,12 +27,12 @@
   --muted: #6B6890;
   --v: #6C5CFF;
   --a: #FF9F1C;
-  --font: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: "Bricolage Grotesque", system-ui, -apple-system, sans-serif;
   --serif: "Playfair Display", Georgia, "Times New Roman", serif;
   --mono: "JetBrains Mono", monospace;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
@@ -43,6 +42,315 @@ body {
   overflow-x: hidden;
 }
 
+/* ==========================================================================
+   3D HERO CINEMATIC VIDEO SECTION (#hero3DSection)
+   ========================================================================== */
+#hero3DSection {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 640px;
+  background: #09061A;
+  overflow: hidden;
+  user-select: none;
+}
+
+#webglHeroCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+/* Atmospheric Gradients & Vignette */
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: 
+    radial-gradient(circle at 50% 50%, transparent 45%, rgba(9, 6, 26, 0.75) 100%),
+    linear-gradient(180deg, rgba(9, 6, 26, 0.5) 0%, transparent 20%, transparent 80%, rgba(9, 6, 26, 0.95) 100%);
+}
+
+/* Minimal Sticky Navigation over 3D Hero */
+.l-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.l-nav-inner {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 1140px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(19, 14, 56, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 8px 16px 8px 22px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+}
+
+.l-brand {
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.l-brand i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFE28A, #FF9F1C 55%, #6C5CFF);
+}
+
+.scene-nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scene-pill {
+  color: #CBB8FF;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.scene-pill:hover, .scene-pill.active {
+  color: #fff;
+  background: #6C5CFF;
+  border-color: #6C5CFF;
+}
+
+.l-cta {
+  background: linear-gradient(135deg, #FFF, #FFE2C7);
+  color: #140E38;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.l-cta:hover { transform: translateY(-1.5px); box-shadow: 0 6px 20px rgba(255, 159, 28, 0.45); }
+
+/* Cinematic Typography Stages on top of 3D Scene */
+.stage-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.scene-text-block {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6% 9%;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.scene-text-block.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scene 1 Typography */
+.scene1-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(124, 108, 255, 0.2);
+  border: 1px solid rgba(203, 184, 255, 0.35);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: clamp(11px, 1.2vw, 14px);
+  font-weight: 700;
+  color: #FFD166;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+
+.scene1-heading {
+  font-family: var(--serif);
+  font-size: clamp(40px, 5.8vw, 82px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+  max-width: 860px;
+}
+.scene1-heading span { display: block; }
+.scene1-heading .italic-highlight {
+  font-style: italic;
+  font-weight: 700;
+  background: linear-gradient(120deg, #FF9F1C, #FFB37C, #FFE28A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Feature Scenes Typography (Scenes 2, 3, 4) */
+.feature-badge-pill {
+  font-family: var(--mono);
+  font-size: clamp(13px, 1.4vw, 18px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #FF9F1C;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.badge-pill-cyan { color: #2EC4B6; }
+.badge-pill-purple { color: #CBB8FF; }
+
+.feature-heading-serif {
+  font-family: var(--serif);
+  font-size: clamp(34px, 4.6vw, 66px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: #FFFFFF;
+  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
+  max-width: 800px;
+}
+
+/* Scene 5 Product Transition Typography */
+.scene5-center-wrap {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene5-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  text-shadow: 0 4px 35px rgba(0, 0, 0, 0.9);
+}
+
+.scene5-cta-button {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #FF9F1C 0%, #FF7A45 100%);
+  color: #120A00;
+  font-family: var(--sans);
+  font-size: clamp(16px, 1.8vw, 22px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 16px 38px;
+  border-radius: 999px;
+  box-shadow: 0 10px 40px rgba(255, 159, 28, 0.5), 0 0 30px rgba(255, 122, 69, 0.4);
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.scene5-cta-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 14px 50px rgba(255, 159, 28, 0.7);
+}
+
+/* 3D Video HUD Control Bar */
+.hero-hud {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 14px 24px;
+  background: linear-gradient(0deg, rgba(4, 2, 12, 0.95) 0%, rgba(4, 2, 12, 0.5) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-timeline-track {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.hud-timeline-progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #FF9F1C, #2EC4B6);
+  border-radius: 999px;
+}
+
+.hud-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #FFF;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.hud-btn:hover { background: rgba(255, 255, 255, 0.18); border-color: #FFF; }
+
+.hud-timestamp {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #CBB8FF;
+}
+
+/* ==========================================================================
+   THE ORIGINAL AI STUDY TOOL DASHBOARD (.app)
+   ========================================================================== */
 body::before {
   content: "";
   position: fixed;
@@ -55,7 +363,6 @@ body::before {
   z-index: 0;
 }
 
-/* Original App Grid Layout */
 .app {
   position: relative;
   display: grid;
@@ -63,6 +370,7 @@ body::before {
   min-height: 100vh;
   min-height: 100dvh;
   z-index: 2;
+  background: var(--bg);
 }
 
 #side {
@@ -89,7 +397,6 @@ body::before {
   gap: 8px;
   color: var(--ink);
 }
-
 .brand i {
   width: 14px;
   height: 14px;
@@ -108,11 +415,7 @@ body::before {
   text-align: left;
   transition: all 0.2s ease;
 }
-
-.btn:hover {
-  border-color: var(--v);
-  background: #FAF8FF;
-}
+.btn:hover { border-color: var(--v); background: #FAF8FF; }
 
 #hist {
   flex: 1;
@@ -121,7 +424,6 @@ body::before {
   flex-direction: column;
   gap: 6px;
 }
-
 .hl { color: var(--muted); font-size: 13px; padding: 8px 8px 2px; }
 .hi {
   font: inherit;
@@ -416,353 +718,6 @@ input, select, textarea {
   cursor: pointer;
 }
 
-/* ==========================================================================
-   CINEMATIC SCROLL-DRIVEN INTRODUCTION STYLES (#landing)
-   ========================================================================== */
-#landing {
-  position: relative;
-  z-index: 10;
-  background: #09061A;
-  color: #FFF;
-  overflow: hidden;
-}
-
-.inchat #landing { display: none; }
-
-/* Sticky Minimal Navigation */
-.l-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  padding: 14px 24px;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-.l-nav-inner {
-  pointer-events: auto;
-  width: 100%;
-  max-width: 1100px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(19, 14, 56, 0.78);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  padding: 8px 14px 8px 20px;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
-}
-.l-brand {
-  font-weight: 800;
-  font-size: 20px;
-  letter-spacing: -0.02em;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.l-brand i {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #FFE28A, #FF9F1C 55%, #6C5CFF);
-}
-.l-links { display: flex; align-items: center; gap: 8px; }
-.l-link {
-  color: #CBB8FF;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  padding: 6px 14px;
-  border-radius: 999px;
-  transition: all 0.2s ease;
-}
-.l-link:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
-.l-cta {
-  background: linear-gradient(135deg, #FFF, #FFE2C7);
-  color: #140E38;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 8px 18px;
-  border-radius: 999px;
-  border: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.l-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255, 159, 28, 0.4); }
-
-/* Cinematic Hero Scene */
-.l-hero {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  padding: 120px 24px 80px;
-}
-
-#hero3DCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  display: block;
-}
-
-.l-hero-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: 
-    linear-gradient(180deg, rgba(9, 6, 26, 0.4) 0%, rgba(19, 14, 56, 0.1) 40%, rgba(9, 6, 26, 0.95) 95%),
-    linear-gradient(90deg, rgba(9, 6, 26, 0.75) 0%, rgba(9, 6, 26, 0.2) 60%, rgba(9, 6, 26, 0.6) 100%);
-}
-
-.l-hero-content {
-  position: relative;
-  z-index: 5;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.l-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  background: rgba(124, 108, 255, 0.18);
-  border: 1px solid rgba(203, 184, 255, 0.3);
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--a);
-  margin-bottom: 20px;
-}
-
-.l-hero-title {
-  font-family: var(--serif);
-  font-size: clamp(42px, 6.4vw, 84px);
-  font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: #FFFFFF;
-  margin: 0 0 20px;
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
-}
-.l-hero-title .italic-accent {
-  display: block;
-  font-style: italic;
-  font-weight: 700;
-  background: linear-gradient(120deg, #FF9F1C, #FFB37C, #FFE28A);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.l-hero-sub {
-  font-size: clamp(17px, 2vw, 21px);
-  line-height: 1.5;
-  color: #EDE8FF;
-  max-width: 540px;
-  margin: 0 0 22px;
-}
-
-.l-quote-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border-left: 3px solid var(--a);
-  border-radius: 0 14px 14px 0;
-  padding: 12px 18px;
-  margin-bottom: 30px;
-  max-width: 560px;
-  font-size: 15px;
-  color: #F7F4FF;
-  font-style: italic;
-  backdrop-filter: blur(10px);
-}
-
-.l-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.l-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, var(--a) 0%, #FF7A45 100%);
-  color: #120A00;
-  font-size: 16px;
-  font-weight: 800;
-  padding: 14px 28px;
-  border-radius: 14px;
-  box-shadow: 0 8px 25px rgba(255, 159, 28, 0.4);
-  text-decoration: none;
-  cursor: pointer;
-  border: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.l-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(255, 159, 28, 0.6); }
-
-.l-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #FFF;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 15px;
-  font-weight: 600;
-  padding: 13px 22px;
-  border-radius: 14px;
-  text-decoration: none;
-  backdrop-filter: blur(10px);
-  transition: all 0.2s ease;
-}
-.l-btn-secondary:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-2px); }
-
-/* Story Chapters */
-.l-section {
-  position: relative;
-  padding: 110px 24px;
-  min-height: 85vh;
-  display: flex;
-  align-items: center;
-}
-.l-container { width: 100%; max-width: 1100px; margin: 0 auto; }
-.l-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 50px; }
-.l-grid.rev { grid-template-columns: 1fr 1fr; }
-.l-grid.rev .l-copy { order: 2; }
-.l-grid.rev .l-visual { order: 1; }
-
-.l-chapter {
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #CBB8FF;
-  margin-bottom: 12px;
-  background: rgba(124, 108, 255, 0.12);
-  padding: 4px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(124, 108, 255, 0.25);
-}
-
-.l-heading {
-  font-family: var(--serif);
-  font-size: clamp(34px, 4.4vw, 58px);
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: #FFFFFF;
-  margin: 0 0 18px;
-}
-.text-orange { color: #FF9F1C; font-style: italic; }
-.text-peach { color: #FFB37C; font-style: italic; }
-.text-cyan { color: #2EC4B6; font-style: italic; }
-.text-purple { color: #CBB8FF; font-style: italic; }
-
-.l-desc {
-  font-size: 17px;
-  line-height: 1.6;
-  color: #B8B0DE;
-  margin: 0 0 24px;
-  max-width: 500px;
-}
-
-.l-bullets { list-style: none; padding: 0; margin: 0 0 28px; display: grid; gap: 10px; }
-.l-bullet { display: flex; align-items: center; gap: 10px; font-size: 15px; color: #EDE8FF; }
-.l-dot { width: 8px; height: 8px; border-radius: 50%; background: #FF9F1C; box-shadow: 0 0 10px #FF9F1C; }
-
-/* Interactive Desk / Cards */
-.desk-card {
-  background: rgba(24, 16, 60, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-}
-.desk-toggle {
-  display: flex;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 4px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-.d-btn {
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 999px;
-  color: #B8B0DE;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-.d-btn.active {
-  background: #6C5CFF;
-  color: #FFF;
-}
-
-/* Section E: Grand Transition */
-.l-trans-section {
-  position: relative;
-  padding: 140px 24px;
-  text-align: center;
-  background: linear-gradient(180deg, #09061A 0%, #1A1248 50%, #F6F4FF 100%);
-}
-.l-trans-title {
-  font-family: var(--serif);
-  font-size: clamp(38px, 5.8vw, 72px);
-  font-weight: 900;
-  line-height: 1.1;
-  color: #FFF;
-  margin: 0 0 18px;
-}
-.l-trans-sub {
-  font-size: clamp(17px, 2vw, 21px);
-  color: #EDE8FF;
-  max-width: 580px;
-  margin: 0 auto 34px;
-}
-
-.portal-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  background: linear-gradient(135deg, #FFFFFF 0%, #FFE2B7 100%);
-  color: #150E38;
-  font-size: 18px;
-  font-weight: 800;
-  padding: 16px 40px;
-  border-radius: 999px;
-  box-shadow: 0 10px 40px rgba(255, 159, 28, 0.5), 0 0 40px rgba(108, 92, 255, 0.3);
-  cursor: pointer;
-  border: 0;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.portal-cta:hover { transform: scale(1.04); box-shadow: 0 14px 45px rgba(255, 159, 28, 0.65); }
-
-/* Scroll reveals */
-.rv { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
-.rv.in { opacity: 1; transform: translateY(0); }
-
 @media (max-width: 860px) {
   .app { grid-template-columns: 1fr; }
   #side { position: fixed; inset: 0 auto 0 0; width: 280px; z-index: 40; transform: translateX(-102%); transition: transform 0.2s; }
@@ -771,18 +726,15 @@ input, select, textarea {
   .cards { grid-template-columns: 1fr; }
   #empty { padding-top: 4vh; }
   #stage { padding-top: 54px; }
-  .l-grid, .l-grid.rev { grid-template-columns: 1fr; gap: 36px; }
-  .l-grid.rev .l-copy { order: 1; }
-  .l-grid.rev .l-visual { order: 2; }
-  .l-links { display: none; }
+  .scene-nav-pills { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .orb, .pulse, .ld .o { animation: none; }
-  #side, .card, .rv { transition: none; transform: none; opacity: 1; }
+  #side, .card { transition: none; transform: none; }
 }
 @media print {
   body { background: #fff; color: #000; }
-  body::before, #side, header, #dock, .tools, .note, #landing { display: none; }
+  body::before, #side, header, #dock, .tools, .note, #hero3DSection { display: none; }
   .app, .main, #stage { display: block; height: auto; min-height: 0; }
   .answer { border: 0; background: #fff; color: #000; }
   th, td { border-color: #999; }
@@ -792,269 +744,104 @@ input, select, textarea {
 <body>
 
 <!-- ==========================================================================
-     CINEMATIC SCROLL-DRIVEN INTRODUCTION (#landing)
+     SCENE 1 TO 5: 3D ANIMATED VIDEO RUNS RIGHT IN THE HERO SECTION
      ========================================================================== -->
-<section id="landing">
+<section id="hero3DSection">
+  <!-- Full-Screen 3D WebGL Canvas -->
+  <canvas id="webglHeroCanvas"></canvas>
+  <div class="hero-vignette"></div>
+
   <!-- Minimal Sticky Navigation -->
   <header class="l-nav">
     <div class="l-nav-inner">
       <div class="l-brand"><i></i><span>BigBrainn’t</span></div>
-      <nav class="l-links">
-        <a href="#struggle" class="l-link">The Struggle</a>
-        <a href="#features" class="l-link">Exam Game Plan</a>
-        <a href="#homework" class="l-link">Homework Helper</a>
-        <a href="#teach-me" class="l-link">Teach Me My Way</a>
-        <a href="intro_video.html" target="_blank" class="l-link" style="color:#FFB37C;font-weight:700;">🎬 3D Video</a>
-      </nav>
-      <button type="button" class="l-cta" id="navEnterTool">Open Study Tool →</button>
+      
+      <div class="scene-nav-pills">
+        <button type="button" class="scene-pill active" data-jump="0">01 Opening</button>
+        <button type="button" class="scene-pill" data-jump="5">02 Exam Plan</button>
+        <button type="button" class="scene-pill" data-jump="10">03 Homework</button>
+        <button type="button" class="scene-pill" data-jump="15">04 Teach Me</button>
+        <button type="button" class="scene-pill" data-jump="20">05 App Zoom</button>
+      </div>
+
+      <button type="button" class="l-cta" id="btnSkipToApp">Enter Study Space →</button>
     </div>
   </header>
 
-  <!-- Scene 1: Opening Hero with Live 3D WebGL World -->
-  <div class="l-hero" id="hero">
-    <canvas id="hero3DCanvas"></canvas>
-    <div class="l-hero-overlay"></div>
-
-    <div class="l-hero-content">
-      <div class="l-eyebrow">
+  <!-- Typography Overlays Synchronized to 3D Camera -->
+  <div class="stage-overlay">
+    <!-- Scene 1: Opening (0s - 5s) -->
+    <div class="scene-text-block active" id="textScene1">
+      <div class="scene1-badge">
         <span>✨</span>
         <span>YOUR ACADEMIC COMEBACK STARTS HERE</span>
       </div>
-
-      <h1 class="l-hero-title">
+      <h1 class="scene1-heading">
         <span>School is hard enough.</span>
-        <span class="italic-accent">Learning shouldn't be.</span>
+        <span class="italic-highlight">Learning shouldn't be.</span>
       </h1>
-
-      <p class="l-hero-sub">
+      <p style="color:#EDE8FF;font-size:clamp(16px, 1.8vw, 20px);margin:14px 0 22px;max-width:540px;">
         Meet your AI study buddy that turns <em>"I'm cooked"</em> into <em>"Wait, I actually get it."</em>
       </p>
+    </div>
 
-      <div class="l-quote-card">
-        <span>💡</span>
-        <p>"You're not bad at studying. You just haven't found your way of learning yet."</p>
+    <!-- Scene 2: Exam Game Plan (5s - 10s) -->
+    <div class="scene-text-block" id="textScene2">
+      <div class="feature-badge-pill">
+        <span>🗺️</span>
+        <span>EXAM GAME PLAN</span>
       </div>
+      <h2 class="feature-heading-serif">
+        From panic mode<br>to a plan that works.
+      </h2>
+    </div>
 
-      <div class="l-actions">
-        <a href="#struggle" class="l-btn-primary">
-          <span>Let's fix that</span>
-          <span aria-hidden="true">→</span>
-        </a>
-        <a href="intro_video.html" target="_blank" class="l-btn-secondary" style="border-color:#FF9F1C;color:#FFB37C;background:rgba(255,159,28,0.14)">
-          <span>🎬 Watch 3D Intro (1080p)</span>
-        </a>
-        <a href="#features" class="l-btn-secondary">
-          <span>Explore the magic</span>
-          <span aria-hidden="true">↓</span>
-        </a>
+    <!-- Scene 3: Homework Helper (10s - 15s) -->
+    <div class="scene-text-block" id="textScene3">
+      <div class="feature-badge-pill badge-pill-cyan">
+        <span>📚</span>
+        <span>HOMEWORK HELPER</span>
       </div>
-      <p style="font-size:13.5px;color:#CBB8FF;margin-top:14px;">
-        Free. No signup required. Hinglish & English ready.
-      </p>
+      <h2 class="feature-heading-serif">
+        Stuck?<br>Let's figure it out together.
+      </h2>
+    </div>
+
+    <!-- Scene 4: Teach Me My Way (15s - 20s) -->
+    <div class="scene-text-block" id="textScene4">
+      <div class="feature-badge-pill badge-pill-purple">
+        <span>🎮</span>
+        <span>TEACH ME MY WAY</span>
+      </div>
+      <h2 class="feature-heading-serif">
+        Your brain.<br>Your pace. Your way.
+      </h2>
+    </div>
+
+    <!-- Scene 5: Transition to the Actual Product (20s - 25s) -->
+    <div class="scene-text-block scene5-center-wrap" id="textScene5">
+      <h2 class="scene5-title">
+        Ready for your academic comeback?
+      </h2>
+      <button type="button" class="scene5-cta-button" id="btnHeroLetsGetStarted">
+        <span>LET'S GET STARTED →</span>
+      </button>
     </div>
   </div>
 
-  <!-- Scene A: The Student Struggle -->
-  <section class="l-section" id="struggle">
-    <div class="l-container">
-      <div class="l-grid">
-        <div class="l-copy rv">
-          <span class="l-chapter">CHAPTER 01 · THE PROBLEM</span>
-          <h2 class="l-heading">
-            Three chapters left.<br>
-            <span class="text-orange">Zero brain cells remaining.</span>
-          </h2>
-          <p class="l-desc">
-            We know the feeling. The deadline is approaching, the textbook looks like another language, and somehow everyone else seems to get it.
-          </p>
-          <div class="l-quote-card" style="margin-bottom:24px;">
-            <span>🧠</span>
-            <p>"Your brain isn't broken. The textbook is just terrible at explaining."</p>
-          </div>
-          <a href="#features" class="l-btn-secondary">See how we build your plan →</a>
-        </div>
-
-        <div class="l-visual rv">
-          <div class="desk-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-              <span style="font-size:13px;font-weight:700;color:#CBB8FF;">THE 2:47 AM STUDY DESK</span>
-              <div class="desk-toggle">
-                <button type="button" class="d-btn active" id="btnPanic">Panic (2:47 AM)</button>
-                <button type="button" class="d-btn" id="btnCalm">Clarity (3:05 AM)</button>
-              </div>
-            </div>
-
-            <svg viewBox="0 0 460 240" style="width:100%;height:auto;display:block;border-radius:14px;background:#100B2B;">
-              <rect x="20" y="190" width="420" height="30" rx="4" fill="#1C144A"/>
-              <path d="M310 190 L310 90 L280 75" stroke="#FFB37C" stroke-width="4" fill="none"/>
-              <polygon points="260,65 310,65 330,95 240,95" fill="#FF9F1C"/>
-              <circle cx="285" cy="105" r="85" fill="#FFEAA7" opacity="0.15"/>
-              <rect x="50" y="170" width="80" height="12" rx="2" fill="#D9658A"/>
-              <rect x="45" y="156" width="85" height="12" rx="2" fill="#6C5CFF"/>
-              <rect x="55" y="142" width="75" height="12" rx="2" fill="#0E9F8E"/>
-              <rect x="340" y="150" width="60" height="38" rx="6" fill="#090518" stroke="#FF4D6D" stroke-width="2"/>
-              <text id="clockDisp" x="370" y="175" font-family="monospace" font-size="15" font-weight="bold" fill="#FF4D6D" text-anchor="middle">02:47</text>
-              <circle id="mascotC" cx="170" cy="140" r="22" fill="#FFE28A"/>
-              <circle cx="162" cy="135" r="2.8" fill="#1B1740"/>
-              <circle cx="178" cy="135" r="2.8" fill="#1B1740"/>
-              <path id="mascotM" d="M162 148 Q170 138 178 148" stroke="#1B1740" stroke-width="2.2" fill="none"/>
-            </svg>
-            <p id="deskCaption" style="font-size:13px;color:#FFB37C;text-align:center;margin:12px 0 0;font-style:italic;">
-              "Panic Mode: Deadline looming, scattered notes, feeling cooked."
-            </p>
-          </div>
-        </div>
-      </div>
+  <!-- 3D HUD Controller at Bottom of Hero -->
+  <div class="hero-hud">
+    <div class="hud-timeline-track" id="hudTrack">
+      <div class="hud-timeline-progress" id="hudProgress"></div>
     </div>
-  </section>
-
-  <!-- Scene B: Feature 01 — Exam Game Plan -->
-  <section class="l-section" id="features">
-    <div class="l-container">
-      <div class="l-grid rev">
-        <div class="l-copy rv">
-          <span class="l-chapter">01 — EXAM GAME PLAN</span>
-          <h2 class="l-heading">
-            From panic mode<br>
-            <span class="text-peach">to a plan that works.</span>
-          </h2>
-          <p class="l-desc">
-            Tell us what exam you're preparing for, when it's happening, and what you need to cover. Get a realistic study schedule that breaks the mountain into manageable steps.
-          </p>
-          <ul class="l-bullets">
-            <li class="l-bullet"><span class="l-dot"></span> Personalized study schedules matching remaining hours.</li>
-            <li class="l-bullet"><span class="l-dot"></span> Smart topic prioritization: Must, Should, or safe to Skip.</li>
-            <li class="l-bullet"><span class="l-dot"></span> Protected sleep and guilt-free breather breaks.</li>
-            <li class="l-bullet"><span class="l-dot"></span> Practice questions and last-hour memory checklists.</li>
-          </ul>
-          <button type="button" class="l-btn-primary" data-direct="rushCard">Plan my comeback →</button>
-        </div>
-
-        <div class="l-visual rv">
-          <div class="desk-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-              <span style="font-size:12.5px;font-weight:700;color:#CBB8FF;">STUDY TIMELINE SIMULATOR</span>
-              <span style="font-size:12.5px;color:#2EC4B6;font-weight:700;">Readiness: 85%</span>
-            </div>
-            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;display:grid;gap:8px;">
-              <div style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#fff;">
-                <span style="color:#2EC4B6;">✓</span>
-                <span style="font-family:monospace;color:#FFB37C;font-size:12px;">08:30 AM</span>
-                <span style="flex:1;">Core Formulas & Definitions</span>
-                <span class="tag t-must">MUST</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#fff;">
-                <span style="color:#2EC4B6;">✓</span>
-                <span style="font-family:monospace;color:#FFB37C;font-size:12px;">09:30 AM</span>
-                <span style="flex:1;">15-min Coffee & Water Break</span>
-                <span class="tag t-skip">REST</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#fff;">
-                <span style="color:#CBB8FF;">○</span>
-                <span style="font-family:monospace;color:#FFB37C;font-size:12px;">09:45 AM</span>
-                <span style="flex:1;">High-Yield Numericals (5 Marks)</span>
-                <span class="tag t-should">SHOULD</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#fff;">
-                <span style="color:#2EC4B6;">✓</span>
-                <span style="font-family:monospace;color:#FFB37C;font-size:12px;">11:00 AM</span>
-                <span style="flex:1;">Obscure 40-page textbook derivations</span>
-                <span class="tag t-skip">SKIP</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="hud-actions-row">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button type="button" class="hud-btn" id="btnHudPlay">⏸ Pause</button>
+        <button type="button" class="hud-btn" id="btnHudReplay">↺ Replay</button>
+        <span class="hud-timestamp" id="hudTime">00:00 / 00:25</span>
       </div>
-    </div>
-  </section>
-
-  <!-- Scene C: Feature 02 — Homework Helper -->
-  <section class="l-section" id="homework">
-    <div class="l-container">
-      <div class="l-grid">
-        <div class="l-copy rv">
-          <span class="l-chapter">02 — HOMEWORK HELPER</span>
-          <h2 class="l-heading">
-            Stuck on question one?<br>
-            <span class="text-cyan">We've got you.</span>
-          </h2>
-          <p class="l-desc">
-            Get help breaking down difficult homework questions, understanding the steps, and figuring out why an answer works.
-          </p>
-          <ul class="l-bullets">
-            <li class="l-bullet"><span class="l-dot" style="background:#0E9F8E;box-shadow:0 0 10px #0E9F8E;"></span> Step-by-step explanations instead of answer dumping.</li>
-            <li class="l-bullet"><span class="l-dot" style="background:#0E9F8E;"></span> Snap a photo or paste messy questions.</li>
-            <li class="l-bullet"><span class="l-dot" style="background:#0E9F8E;"></span> Answers written exactly the way your teacher wants.</li>
-            <li class="l-bullet"><span class="l-dot" style="background:#0E9F8E;"></span> Deep reasoning that helps you solve similar problems alone.</li>
-          </ul>
-          <button type="button" class="l-btn-primary" data-direct="hwCard">Let's solve it →</button>
-        </div>
-
-        <div class="l-visual rv">
-          <div class="desk-card" style="border-color:rgba(14,159,142,0.3);">
-            <span style="font-size:12px;font-family:monospace;color:#2EC4B6;display:block;margin-bottom:8px;">STEP-BY-STEP WORKBOOK PREVIEW</span>
-            <div style="background:rgba(0,0,0,0.3);border-left:3px solid #0E9F8E;padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:12px;font-size:14px;color:#fff;">
-              "Q: A 1,200 kg car accelerates from 0 to 20 m/s in 8 seconds. Find the force."
-            </div>
-            <div style="font-size:13px;color:#EDE8FF;line-height:1.5;">
-              <strong>Step 1:</strong> a = (20 - 0) / 8 = 2.5 m/s²<br>
-              <strong>Step 2:</strong> F = m × a = 1,200 × 2.5 = 3,000 N<br>
-              <div style="margin-top:10px;padding:8px 12px;background:rgba(14,159,142,0.15);border-radius:8px;border:1px dashed #0E9F8E;">
-                💡 <b>Why it works:</b> Force is just the physical push required to change velocity!
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Scene D: Feature 03 — Teach Me My Way -->
-  <section class="l-section" id="teach-me">
-    <div class="l-container">
-      <div class="l-grid rev">
-        <div class="l-copy rv">
-          <span class="l-chapter">03 — TEACH ME MY WAY</span>
-          <h2 class="l-heading">
-            If one explanation fails,<br>
-            <span class="text-purple">try another.</span>
-          </h2>
-          <p class="l-desc">
-            Some students need simple language. Others need examples, analogies, visual explanations, or a quick quiz. Choose how you learn best and let the AI adapt.
-          </p>
-          <ul class="l-bullets">
-            <li class="l-bullet"><span class="l-dot" style="background:#6C5CFF;box-shadow:0 0 10px #6C5CFF;"></span> Explain it simply in 6th-grade words.</li>
-            <li class="l-bullet"><span class="l-dot" style="background:#6C5CFF;"></span> Real-life everyday examples.</li>
-            <li class="l-bullet"><span class="l-dot" style="background:#6C5CFF;"></span> Analogies in Minecraft, cricket, Marvel, or gossip.</li>
-            <li class="l-bullet"><span class="l-dot" style="background:#6C5CFF;"></span> Quick interactive quizzes to lock in marks.</li>
-          </ul>
-          <button type="button" class="l-btn-primary" data-direct="vibeCard">Teach me something →</button>
-        </div>
-
-        <div class="l-visual rv">
-          <div class="desk-card" style="border-color:rgba(108,92,255,0.35);">
-            <span style="font-size:12px;font-family:monospace;color:#CBB8FF;display:block;margin-bottom:10px;">TOPIC: PHOTOSYNTHESIS (MINECRAFT ANALOGY)</span>
-            <p style="font-size:14px;color:#EDE8FF;line-height:1.6;">
-              "Think of a leaf as an automatic Minecraft crafting station: Sunlight = furnace fuel, Water + CO₂ = raw materials. The plant crafts Bread (Glucose) and drops free Oxygen for the server!"
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Scene E: The Grand Transition Into the Actual Product -->
-  <div class="l-trans-section" id="transition">
-    <div class="l-container rv">
-      <h2 class="l-trans-title">
-        Okay. Enough scrolling.<br>
-        <span style="color:#FF9F1C;font-style:italic;">Let's get you passing.</span>
-      </h2>
-      <p class="l-trans-sub">
-        Your syllabus isn't going to study itself. Let's make this easier.
-      </p>
-      <button type="button" class="portal-cta" id="btnEnterApp">
-        <span>Enter my study space →</span>
+      <button type="button" class="hud-btn" id="btnHudScrollDown" style="background:#FF9F1C;color:#000;border:0;">
+        Scroll to Study Tool ↓
       </button>
     </div>
   </div>
@@ -1069,7 +856,7 @@ input, select, textarea {
   <aside id="side">
     <div class="brand"><i></i>BigBrainn’t</div>
     <button class="btn" id="newChat">+ New chat</button>
-    <button class="btn" id="introStoryBtn" style="color:var(--v);font-weight:600;">📖 Introduction Story</button>
+    <button class="btn" id="introStoryBtn" style="color:var(--v);font-weight:600;">🎬 Replay 3D Intro</button>
     <div id="hist"></div>
     <div id="acct" hidden><button class="btn" id="loginBtn" style="width:100%">Log in / Sign up</button></div>
     <button class="btn" id="aboutBtn">About me</button>
@@ -1205,7 +992,343 @@ input, select, textarea {
 </dialog>
 
 <script src="config.js"></script>
+
 <script>
+/* ==========================================================================
+   THE 3D ANIMATED VIDEO RUNS RIGHT IN THE HERO SECTION (THREE.JS)
+   ========================================================================== */
+const TOTAL_DURATION = 25.0; // 25s continuous 3D cinematography
+let heroTime = 0;
+let isHeroPlaying = true;
+
+const heroCanvas = document.getElementById("webglHeroCanvas");
+
+// WebGL Renderer
+const renderer = new THREE.WebGLRenderer({
+  canvas: heroCanvas,
+  antialias: true,
+  powerPreference: "high-performance"
+});
+renderer.setSize(heroCanvas.clientWidth || innerWidth, heroCanvas.clientHeight || innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("#09061A");
+scene.fog = new THREE.FogExp2("#09061A", 0.022);
+
+const camera = new THREE.PerspectiveCamera(45, (heroCanvas.clientWidth || innerWidth) / (heroCanvas.clientHeight || innerHeight), 0.1, 150);
+camera.position.set(0, 2.5, 12);
+
+// Lighting
+const ambLight = new THREE.AmbientLight("#4A3780", 1.8);
+scene.add(ambLight);
+const keyLight = new THREE.DirectionalLight("#FFE2A0", 3.2);
+keyLight.position.set(12, 18, 14);
+scene.add(keyLight);
+const rimP = new THREE.PointLight("#7C6CFF", 5.0, 35);
+rimP.position.set(-10, 6, -8);
+scene.add(rimP);
+const rimO = new THREE.PointLight("#FF9F1C", 6.5, 35);
+rimO.position.set(10, 4, -4);
+scene.add(rimO);
+
+// 1,200 Floating Stardust Particles
+const pCount = 1200;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(pCount * 3);
+const pCols = new Float32Array(pCount * 3);
+const palette = [new THREE.Color("#FFD166"), new THREE.Color("#FF9F1C"), new THREE.Color("#CBB8FF"), new THREE.Color("#2EC4B6"), new THREE.Color("#FFFFFF")];
+
+for (let i = 0; i < pCount; i++) {
+  pPos[i * 3] = (Math.random() - 0.5) * 60;
+  pPos[i * 3 + 1] = (Math.random() - 0.5) * 35;
+  pPos[i * 3 + 2] = (Math.random() - 0.5) * 60;
+  const c = palette[Math.floor(Math.random() * palette.length)];
+  pCols[i * 3] = c.r; pCols[i * 3 + 1] = c.g; pCols[i * 3 + 2] = c.b;
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('color', new THREE.BufferAttribute(pCols, 3));
+const pMat = new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
+const pSys = new THREE.Points(pGeo, pMat);
+scene.add(pSys);
+
+// 3D Books & Winding Path (Scene 1)
+const scene1Group = new THREE.Group();
+scene.add(scene1Group);
+
+function createBook(colorHex) {
+  const g = new THREE.Group();
+  const cover = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.14, 2.9), new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.35, metalness: 0.15 }));
+  const pages = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.38, 2.7), new THREE.MeshStandardMaterial({ color: "#FFF6E5", roughness: 0.8 }));
+  pages.position.set(0.05, 0, 0);
+  const ribbon = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.42, 2.92), new THREE.MeshStandardMaterial({ color: "#FFD166", metalness: 0.8, roughness: 0.2 }));
+  ribbon.position.set(-1.0, 0, 0);
+  g.add(cover, pages, ribbon);
+  return g;
+}
+
+const floatingBooks = [];
+const bookColors = ["#3A1F6E", "#D9658A", "#1D1348", "#E07B00", "#1C6B61", "#6C5CFF"];
+for (let i = 0; i < 8; i++) {
+  const b = createBook(bookColors[i % bookColors.length]);
+  b.position.set((Math.random() - 0.5) * 16 + (i > 3 ? 5 : -5), (Math.random() - 0.5) * 6 + 1.5, (Math.random() - 0.5) * 14 - 2);
+  b.rotation.set(Math.random() * 0.8, Math.random() * Math.PI, Math.random() * 0.6);
+  b.scale.setScalar(0.75 + Math.random() * 0.4);
+  scene1Group.add(b);
+  floatingBooks.push({ mesh: b, rx: 0.002 + Math.random() * 0.004, ry: 0.003 + Math.random() * 0.005, fy: b.position.y, sp: 0.8 + Math.random() * 0.8 });
+}
+
+// Golden Path
+const pathCurve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-8, -1.8, 10), new THREE.Vector3(-3, -1.5, 4), new THREE.Vector3(2, -1.2, -2), new THREE.Vector3(0, -0.8, -9), new THREE.Vector3(5, -0.4, -18)
+]);
+const pathMesh = new THREE.Mesh(
+  new THREE.TubeGeometry(pathCurve, 64, 0.6, 8, false),
+  new THREE.MeshStandardMaterial({ color: "#FFB37C", emissive: "#FF9F1C", emissiveIntensity: 0.6, roughness: 0.2, metalness: 0.7 })
+);
+scene1Group.add(pathMesh);
+
+// Scene 2: 3D Calendar & Priority Cards
+const scene2Group = new THREE.Group();
+scene2Group.position.set(0, 0, -22);
+scene.add(scene2Group);
+const calBase = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.3, 5.2), new THREE.MeshStandardMaterial({ color: "#181045", roughness: 0.3, metalness: 0.3 }));
+calBase.rotation.x = 0.35;
+scene2Group.add(calBase);
+
+function createCard(col, xPos) {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 1.2), new THREE.MeshStandardMaterial({ color: col, roughness: 0.2, metalness: 0.4 })));
+  g.position.set(xPos, 1.4, 0.6);
+  g.rotation.x = 0.2;
+  return g;
+}
+const cardMust = createCard("#FF6B8B", -2.2);
+const cardShould = createCard("#FFB37C", 0);
+const cardSkip = createCard("#7C6CFF", 2.2);
+scene2Group.add(cardMust, cardShould, cardSkip);
+
+// Scene 3: Open 3D Notebook & Lightbulb
+const scene3Group = new THREE.Group();
+scene3Group.position.set(0, 0, -44);
+scene.add(scene3Group);
+const nbLeft = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.08, 4.8), new THREE.MeshStandardMaterial({ color: "#2B1B6D", roughness: 0.4 }));
+nbLeft.position.set(-1.85, 0, 0);
+const nbRight = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.08, 4.8), new THREE.MeshStandardMaterial({ color: "#2B1B6D", roughness: 0.4 }));
+nbRight.position.set(1.85, 0, 0);
+const openNotebook = new THREE.Group();
+openNotebook.add(nbLeft, nbRight);
+openNotebook.rotation.x = 0.45;
+scene3Group.add(openNotebook);
+
+const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.04, 16, 64), new THREE.MeshBasicMaterial({ color: "#2EC4B6" }));
+ring.rotation.x = Math.PI / 2;
+ring.position.set(0, 0.8, 0);
+scene3Group.add(ring);
+
+const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 32), new THREE.MeshStandardMaterial({ color: "#FFF5D1", emissive: "#FFD166", emissiveIntensity: 1.8, roughness: 0.1 }));
+bulb.position.set(0, 2.2, 0);
+scene3Group.add(bulb);
+
+// Scene 4: Open Radiant Book & Transforming Concept Hologram
+const scene4Group = new THREE.Group();
+scene4Group.position.set(0, 0, -66);
+scene.add(scene4Group);
+const grandBook = new THREE.Group();
+const gLeft = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.1, 4.6), new THREE.MeshStandardMaterial({ color: "#FFF8E7", roughness: 0.5 }));
+gLeft.position.set(-1.75, 0, 0); gLeft.rotation.z = -0.15;
+const gRight = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.1, 4.6), new THREE.MeshStandardMaterial({ color: "#FFF8E7", roughness: 0.5 }));
+gRight.position.set(1.75, 0, 0); gRight.rotation.z = 0.15;
+grandBook.add(gLeft, gRight); grandBook.rotation.x = 0.5;
+scene4Group.add(grandBook);
+
+const conceptPrism = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2, 0), new THREE.MeshStandardMaterial({ color: "#CBB8FF", emissive: "#7C6CFF", emissiveIntensity: 0.8, wireframe: true }));
+conceptPrism.position.set(-1.8, 2.2, 0);
+scene4Group.add(conceptPrism);
+
+const mcBlock = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), new THREE.MeshStandardMaterial({ color: "#2EC4B6", roughness: 0.4, metalness: 0.2 }));
+mcBlock.position.set(1.8, 2.2, 0);
+scene4Group.add(mcBlock);
+
+// Scene 5: 3D Laptop with Dashboard Screen
+const scene5Group = new THREE.Group();
+scene5Group.position.set(0, 0, -88);
+scene.add(scene5Group);
+
+const sCanvas = document.createElement("canvas");
+sCanvas.width = 1920; sCanvas.height = 1200;
+const scCtx = sCanvas.getContext("2d");
+scCtx.fillStyle = "#0E0A28"; scCtx.fillRect(0, 0, 1920, 1200);
+scCtx.fillStyle = "#150F38"; scCtx.fillRect(0, 0, 1920, 100);
+scCtx.fillStyle = "#FF9F1C"; scCtx.beginPath(); scCtx.arc(80, 50, 16, 0, Math.PI * 2); scCtx.fill();
+scCtx.fillStyle = "#FFFFFF"; scCtx.font = "bold 34px sans-serif"; scCtx.fillText("BigBrainn’t", 115, 62);
+scCtx.fillStyle = "#FFFFFF"; scCtx.font = "italic 800 68px serif"; scCtx.textAlign = "center";
+scCtx.fillText("Hey, what are we cracking today?", 960, 260);
+
+const laptopBase = new THREE.Mesh(new THREE.BoxGeometry(10.5, 0.24, 7.2), new THREE.MeshStandardMaterial({ color: "#25203D", metalness: 0.8, roughness: 0.25 }));
+const lidGroup = new THREE.Group();
+lidGroup.position.set(0, 0.12, -3.6);
+const lidBack = new THREE.Mesh(new THREE.BoxGeometry(10.5, 7.0, 0.2), new THREE.MeshStandardMaterial({ color: "#25203D", metalness: 0.8, roughness: 0.25 }));
+lidBack.position.set(0, 3.5, 0); lidGroup.add(lidBack);
+const screenTexture = new THREE.CanvasTexture(sCanvas);
+const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(9.8, 6.2), new THREE.MeshBasicMaterial({ map: screenTexture }));
+screenMesh.position.set(0, 3.5, 0.12); lidGroup.add(screenMesh);
+lidGroup.rotation.x = 0.18;
+const laptopGroup = new THREE.Group();
+laptopGroup.add(laptopBase, lidGroup);
+scene5Group.add(laptopGroup);
+
+// Synchronized 3D Timeline and Camera Motion
+function update3DCinema(t) {
+  pSys.rotation.y = t * 0.04;
+  floatingBooks.forEach((fb, idx) => {
+    fb.mesh.rotation.x += fb.rx;
+    fb.mesh.rotation.y += fb.ry;
+    fb.mesh.position.y = fb.fy + Math.sin(t * fb.sp + idx) * 0.35;
+  });
+  cardMust.rotation.y = Math.sin(t * 1.5) * 0.15;
+  cardShould.rotation.y = Math.sin(t * 1.5 + 1) * 0.15;
+  cardSkip.rotation.y = Math.sin(t * 1.5 + 2) * 0.15;
+  ring.rotation.z = t * 0.4;
+  bulb.position.y = 2.2 + Math.sin(t * 2.5) * 0.18;
+  conceptPrism.rotation.x = t * 0.8; conceptPrism.rotation.y = t * 0.6;
+  mcBlock.rotation.x = t * 0.5; mcBlock.rotation.y = t * 0.7;
+
+  // Camera paths across the 5 Scenes
+  let activeScene = 1;
+  if (t < 5.0) {
+    activeScene = 1;
+    const p = t / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(0.8, -1.2, p);
+    camera.position.y = THREE.MathUtils.lerp(2.8, 1.8, p);
+    camera.position.z = THREE.MathUtils.lerp(12.0, 4.0, p);
+    camera.lookAt(0, 1.2, -2);
+  } else if (t < 10.0) {
+    activeScene = 2;
+    const p = (t - 5.0) / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(-1.2, 2.0, p);
+    camera.position.y = THREE.MathUtils.lerp(1.8, 3.2, p);
+    camera.position.z = THREE.MathUtils.lerp(4.0, -16.0, p);
+    camera.lookAt(0, 1.0, -22);
+  } else if (t < 15.0) {
+    activeScene = 3;
+    const p = (t - 10.0) / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(2.0, -0.8, p);
+    camera.position.y = THREE.MathUtils.lerp(3.2, 2.2, p);
+    camera.position.z = THREE.MathUtils.lerp(-16.0, -38.0, p);
+    camera.lookAt(0, 1.4, -44);
+  } else if (t < 20.0) {
+    activeScene = 4;
+    const p = (t - 15.0) / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(-0.8, 1.5, p);
+    camera.position.y = THREE.MathUtils.lerp(2.2, 2.8, p);
+    camera.position.z = THREE.MathUtils.lerp(-38.0, -60.0, p);
+    camera.lookAt(0, 1.6, -66);
+  } else {
+    activeScene = 5;
+    const p = (t - 20.0) / 5.0;
+    const easeP = p * p;
+    camera.position.x = 0;
+    camera.position.y = THREE.MathUtils.lerp(2.6, 3.65, p);
+    camera.position.z = THREE.MathUtils.lerp(-74.0, -84.15, easeP);
+    camera.lookAt(0, 3.65, -88);
+  }
+
+  // Update text blocks & scene pills
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById("textScene" + i);
+    if (el) el.classList.toggle("active", i === activeScene);
+  }
+  document.querySelectorAll(".scene-pill").forEach((pill, idx) => {
+    pill.classList.toggle("active", (idx + 1) === activeScene);
+  });
+}
+
+// Render Animation Loop
+let lastFrameTime = performance.now();
+function renderHero3D(now) {
+  requestAnimationFrame(renderHero3D);
+
+  // If user has scrolled into the app, pause WebGL loop to save 100% GPU
+  if (scrollY > innerHeight * 1.2) return;
+
+  const dt = (now - lastFrameTime) / 1000;
+  lastFrameTime = now;
+
+  if (isHeroPlaying) {
+    heroTime += dt;
+    if (heroTime >= TOTAL_DURATION) {
+      heroTime = TOTAL_DURATION;
+      isHeroPlaying = false;
+      document.getElementById("btnHudPlay").textContent = "▶ Play";
+    }
+  }
+
+  update3DCinema(heroTime);
+  renderer.render(scene, camera);
+
+  // Update HUD
+  const pct = (heroTime / TOTAL_DURATION) * 100;
+  document.getElementById("hudProgress").style.width = pct + "%";
+  const sec = Math.floor(heroTime);
+  const ms = Math.floor((heroTime % 1) * 10);
+  document.getElementById("hudTime").textContent = `00:${sec < 10 ? '0' : ''}${sec}.${ms} / 00:25`;
+}
+requestAnimationFrame(renderHero3D);
+
+// HUD & Pill Controls
+document.getElementById("btnHudPlay").onclick = () => {
+  isHeroPlaying = !isHeroPlaying;
+  document.getElementById("btnHudPlay").textContent = isHeroPlaying ? "⏸ Pause" : "▶ Play";
+};
+document.getElementById("btnHudReplay").onclick = () => {
+  heroTime = 0;
+  isHeroPlaying = true;
+  document.getElementById("btnHudPlay").textContent = "⏸ Pause";
+};
+document.querySelectorAll(".scene-pill").forEach(pill => {
+  pill.onclick = () => {
+    heroTime = parseFloat(pill.dataset.jump);
+    isHeroPlaying = true;
+    document.getElementById("btnHudPlay").textContent = "⏸ Pause";
+  };
+});
+document.getElementById("hudTrack").onclick = (e) => {
+  const r = e.currentTarget.getBoundingClientRect();
+  heroTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * TOTAL_DURATION;
+};
+
+// Transition into the working app dashboard
+function glideIntoApp() {
+  document.getElementById("app").scrollIntoView({ behavior: "smooth" });
+}
+document.getElementById("btnSkipToApp").onclick = glideIntoApp;
+document.getElementById("btnHudScrollDown").onclick = glideIntoApp;
+document.getElementById("btnHeroLetsGetStarted").onclick = glideIntoApp;
+
+// Return to 3D Intro from app sidebar
+document.getElementById("introStoryBtn").onclick = () => {
+  heroTime = 0;
+  isHeroPlaying = true;
+  document.getElementById("btnHudPlay").textContent = "⏸ Pause";
+  document.getElementById("hero3DSection").scrollIntoView({ behavior: "smooth" });
+  document.getElementById("side").classList.remove("open");
+};
+
+// Resize
+window.addEventListener("resize", () => {
+  const w = heroCanvas.clientWidth || innerWidth;
+  const h = heroCanvas.clientHeight || innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+</script>
+
+<script>
+/* ==========================================================================
+   ORIGINAL AI STUDY TOOL SCRIPT & LOGIC (BIGBRAINN’T)
+   ========================================================================== */
 const $ = (i) => document.getElementById(i);
 const INT = ["Minecraft", "Gossip", "Cricket", "K-pop", "Free Fire", "Anime"];
 const LV = [["weak", "Behind"], ["average", "Okay"], ["strong", "Strong"]];
@@ -1250,9 +1373,9 @@ function md(src) {
 
   for (const raw of src.split("\n")) {
     const line = raw.trimEnd();
-    if (/^\s*\|/.test(line)) { cl(); t.push(x); continue; } else ft();
+    if (/^\s*\|/.test(line)) { cl(); t.push(line); continue; } else ft();
     if (/^#{1,4}\s/.test(line)) { cl(); o += "<h2>" + inl(line.replace(/^#{1,4}\s/, "")) + "</h2>"; }
-    else if (/^\s*[-*•]\s+/.test(line)) { if (!l) { o += "<ul>"; l = true; } o += "<li>" + inl(line.replace(/^\s*[-*•]\s+/,"")) + "</li>"; }
+    else if (/^\s*[-*•]\s+/.test(line)) { if (!l) { o += "<ul>"; l = true; } o += "<li>" + inl(line.replace(/^\s*[-*•]\s+/, "")) + "</li>"; }
     else if (/^\s*-{3,}\s*$/.test(line)) { cl(); o += "<hr>"; }
     else if (!line.trim()) cl();
     else { cl(); o += "<p>" + inl(line) + "</p>"; }
@@ -1296,10 +1419,6 @@ function drawHist() {
 }
 
 function place(home) {
-  if (!home && !document.body.classList.contains("inchat")) {
-    document.body.classList.add("inchat");
-    scrollTo(0, 0);
-  }
   (home ? $("homeSlot") : $("dockSlot")).appendChild($("dock"));
   $("app").classList.toggle("chat", !home);
   $("empty").querySelectorAll(".orb, h1, .intro").forEach(n => n.hidden = !home);
@@ -1369,15 +1488,14 @@ function openChat(e) {
   });
 }
 
-// Fallback generator when running offline / without server
 function getSimulatedFallback(p) {
   if (p.mode === "rush") {
-    return `## Reality check\nYou have ${p.examVal} ${p.examUnit} and about ${p.perDay * (p.examUnit === "days" ? p.examVal : 1)} total study hours. With smart skips, an 80%+ score is realistic.\n\n## Priority map\n| Topic | Priority | Time | Why |\n|---|---|---|---|\n| Core Formulas & Concepts | Must | 2.5 hrs | 40% of marks directly stem from here |\n| High-yield Questions | Must | 2.0 hrs | Frequently repeated 5-markers |\n| Short Practice Drills | Should | 1.5 hrs | Test speed and eliminate sign errors |\n| Lengthy historical derivations | Skip | 0 hrs | Low yield, high time drain |\n\n## Your timeline\n| When | What to do | Goal |\n|---|---|---|\n| Block 1 | Must-solve formula derivations | Lock in guaranteed marks |\n| Break | Water, chai & eyes off screen | Reset brain stamina |\n| Block 2 | Practice past paper questions | Perfect exam timing |`;
+    return `## Reality check\nYou have ${p.examVal} ${p.examUnit} left. With strategic prioritization, covering all core concepts and securing high marks is 100% achievable.\n\n## Priority map\n| Topic | Priority | Time | Why |\n|---|---|---|---|\n| Core Formulas & High-yield Units | Must | 2.5 hrs | 40% of standard questions stem directly from here |\n| 5-Mark Numericals | Must | 2.0 hrs | Guaranteed test points |\n| Conceptual Practice | Should | 1.5 hrs | Speed and precision training |\n| Lengthy historical derivations | Skip | 0 hrs | Negligible exam appearance |\n\n## Your timeline\n| When | What to do | Goal |\n|---|---|---|\n| Block 1 | Solve core formula drills | Lock in guaranteed marks |\n| Breather | Water, chai & reset | Prevent mental fatigue |\n| Block 2 | Practice past paper questions | Solidify exam readiness |`;
   }
   if (p.mode === "homework") {
-    return `## Step-by-step Solution (${p.subject})\n\n### Step 1: Given Information\nList known values and identify exactly what requires solving.\n\n### Step 2: The Core Working\nApply the governing textbook formula in ${p.style} format.\n- Formula: Express clearly.\n- Calculation: Substitute values step by step.\n- **Answer:** Verified and clean.\n\n### Why:\nThis problem relies on conservation of energy/balance rather than memorizing numbers.\n\n## Quick check\n- Verify units.\n- Check arithmetic signs.`;
+    return `## Step-by-step Solution (${p.subject})\n\n### Step 1: Given Information\nList known values and identify exactly what needs solving.\n\n### Step 2: The Core Working\nApply the governing formula in ${p.style} format:\n- Formula: State clearly.\n- Calculation: Substitute values step by step.\n- **Answer:** Verified and clean.\n\n### Why:\nThis problem relies on conservation principles rather than blind number memorization.\n\n## Quick check\n- Verify units.\n- Check arithmetic signs.`;
   }
-  return `## In simple words\n${p.topic || "This topic"} is like a connected network where inputs transform smoothly into results.\n\n## Example\nThink of it like an everyday battery powering your phone—stored potential energy turning into light and action!\n\n## Exam-ready version\nDefine it as: *"The fundamental process through which given states undergo transformation to produce measurable outputs."*\n\n## Test yourself\n1. What is the main input?\n2. Why does the transformation work?`;
+  return `## In simple words\n${p.topic || "This topic"} works like a connected system where inputs cleanly transform into outputs.\n\n## Example\nThink of it like charging your phone—stored electrical potential transforming into bright display output!\n\n## Exam-ready version\nDefine it as: *"The fundamental process through which given states undergo transformation to produce measurable outputs."*\n\n## Test yourself\n1. What is the main input?\n2. Why does the transformation work?`;
 }
 
 async function ask(p, title, img, ctx) {
@@ -1414,7 +1532,6 @@ async function ask(p, title, img, ctx) {
       t += dc.decode();
       if (!t.trim()) throw new Error("No answer came back. Try again.");
     } else {
-      // Offline fallback
       t = getSimulatedFallback(p);
     }
 
@@ -1430,7 +1547,6 @@ async function ask(p, title, img, ctx) {
     }
     fill(box, t);
   } catch (e) {
-    // If server unreachable, use high-fidelity demo fallback
     const t = getSimulatedFallback(p);
     conv.push({ r: "u", t: ctx.user, l: title }, { r: "m", t });
     cur = { k, title, text: t, msgs: conv.slice() };
@@ -1562,50 +1678,6 @@ $("hwGo").onclick = () => {
   H.img = ""; H.imgUrl = ""; drawHpv(); $("hwText").value = ""; $("hwNote").value = "";
 };
 
-// Return to introduction story from sidebar
-$("introStoryBtn").onclick = () => {
-  document.body.classList.remove("inchat");
-  $("landing").scrollIntoView({ behavior: "smooth" });
-  $("side").classList.remove("open");
-};
-
-// Transition into app from landing
-function enterTool(cardId) {
-  $("app").scrollIntoView({ behavior: "smooth" });
-  if (cardId && $(cardId)) {
-    setTimeout(() => $(cardId).click(), 600);
-  }
-}
-$("btnEnterApp").onclick = () => enterTool();
-$("navEnterTool").onclick = () => enterTool();
-document.querySelectorAll("[data-direct]").forEach(btn => {
-  btn.onclick = () => enterTool(btn.dataset.direct);
-});
-
-// Chaos to clarity toggle
-$("btnPanic").onclick = () => {
-  $("btnPanic").classList.add("active");
-  $("btnCalm").classList.remove("active");
-  $("clockDisp").textContent = "02:47";
-  $("clockDisp").setAttribute("fill", "#FF4D6D");
-  $("deskCaption").textContent = '"Panic Mode: Deadline looming, scattered notes, feeling cooked."';
-  $("mascotM").setAttribute("d", "M162 148 Q170 138 178 148");
-};
-$("btnCalm").onclick = () => {
-  $("btnCalm").classList.add("active");
-  $("btnPanic").classList.remove("active");
-  $("clockDisp").textContent = "25:00";
-  $("clockDisp").setAttribute("fill", "#2EC4B6");
-  $("deskCaption").textContent = '"Clarity Mode: Clear focus timer, organized notes, comeback loading!"';
-  $("mascotM").setAttribute("d", "M162 138 Q170 152 178 138");
-};
-
-// Reveal on scroll
-const io = new IntersectionObserver((es) => es.forEach(e => {
-  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-}), { threshold: 0.15 });
-document.querySelectorAll(".rv").forEach(n => io.observe(n));
-
 // Auth (Supabase)
 let sb = null, user = null, signup = false;
 const acctLabel = () => { $("loginBtn").textContent = user ? "👤 " + user.email + " · Log out" : "Log in / Sign up"; };
@@ -1668,120 +1740,6 @@ $("aGo").onclick = async () => {
   $("authDlg").close();
 };
 
-// ==========================================================================
-// LIVE THREE.JS 3D HERO ANIMATION WORLD
-// ==========================================================================
-(function init3DHero() {
-  const c = $("hero3DCanvas");
-  if (!c || !window.THREE) return;
-  const renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(c.clientWidth || innerWidth, c.clientHeight || innerHeight);
-
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x09061A, 0.025);
-
-  const camera = new THREE.PerspectiveCamera(45, (c.clientWidth || innerWidth) / (c.clientHeight || innerHeight), 0.1, 100);
-  camera.position.set(0, 1.8, 11);
-
-  // Lights
-  const amb = new THREE.AmbientLight(0x4A3780, 1.8);
-  scene.add(amb);
-  const dir = new THREE.DirectionalLight(0xFFE2A0, 3.0);
-  dir.position.set(8, 14, 10);
-  scene.add(dir);
-  const rimP = new THREE.PointLight(0x7C6CFF, 4.0, 30);
-  rimP.position.set(-8, 4, -6);
-  scene.add(rimP);
-  const rimO = new THREE.PointLight(0xFF9F1C, 5.0, 30);
-  rimO.position.set(8, 2, -2);
-  scene.add(rimO);
-
-  // Stardust Particles
-  const pCount = 900;
-  const pGeo = new THREE.BufferGeometry();
-  const pPos = new Float32Array(pCount * 3);
-  const pCols = new Float32Array(pCount * 3);
-  const palette = [new THREE.Color(0xFFD166), new THREE.Color(0xFF9F1C), new THREE.Color(0xCBB8FF), new THREE.Color(0xFFFFFF)];
-  for (let i = 0; i < pCount; i++) {
-    pPos[i*3] = (Math.random() - 0.5) * 40;
-    pPos[i*3+1] = (Math.random() - 0.5) * 24;
-    pPos[i*3+2] = (Math.random() - 0.5) * 40;
-    const col = palette[Math.floor(Math.random() * palette.length)];
-    pCols[i*3] = col.r; pCols[i*3+1] = col.g; pCols[i*3+2] = col.b;
-  }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  pGeo.setAttribute('color', new THREE.BufferAttribute(pCols, 3));
-  const pMat = new THREE.PointsMaterial({ size: 0.15, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending });
-  const pSys = new THREE.Points(pGeo, pMat);
-  scene.add(pSys);
-
-  // Floating 3D Books
-  const books = [];
-  const bColors = [0x3A1F6E, 0xD9658A, 0x1D1348, 0xE07B00, 0x6C5CFF, 0x0E9F8E];
-  for (let i = 0; i < 7; i++) {
-    const bg = new THREE.Group();
-    const cover = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.14, 2.7), new THREE.MeshStandardMaterial({ color: bColors[i % bColors.length], roughness: 0.4 }));
-    const pages = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.36, 2.5), new THREE.MeshStandardMaterial({ color: 0xFFF7E8, roughness: 0.8 }));
-    pages.position.set(0.06, 0, 0);
-    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.4, 2.72), new THREE.MeshStandardMaterial({ color: 0xFFD166, metalness: 0.8, roughness: 0.2 }));
-    rib.position.set(-0.95, 0, 0);
-    bg.add(cover, pages, rib);
-    bg.position.set((Math.random() - 0.5) * 14 + (i > 3 ? 4 : -4), (Math.random() - 0.5) * 5 + 1.2, (Math.random() - 0.5) * 12 - 2);
-    bg.rotation.set(Math.random() * 0.6, Math.random() * Math.PI, Math.random() * 0.4);
-    bg.scale.setScalar(0.75 + Math.random() * 0.35);
-    scene.add(bg);
-    books.push({ m: bg, rx: 0.003 + Math.random()*0.003, ry: 0.004 + Math.random()*0.004, fy: bg.position.y, sp: 0.8 + Math.random()*0.8 });
-  }
-
-  // Winding 3D Glowing Path
-  const curve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-6, -1.8, 8),
-    new THREE.Vector3(-2, -1.5, 3),
-    new THREE.Vector3(2.5, -1.2, -3),
-    new THREE.Vector3(0, -0.8, -10),
-    new THREE.Vector3(4, -0.4, -18)
-  ]);
-  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.5, 8, false), new THREE.MeshStandardMaterial({ color: 0xFFB37C, emissive: 0xFF9F1C, emissiveIntensity: 0.6, roughness: 0.2, metalness: 0.6 }));
-  scene.add(tube);
-
-  // Parallax interaction with Mouse
-  let mouseX = 0, mouseY = 0;
-  window.addEventListener("mousemove", (e) => {
-    mouseX = (e.clientX / innerWidth - 0.5) * 1.5;
-    mouseY = (e.clientY / innerHeight - 0.5) * 1.2;
-  });
-
-  function resize() {
-    if (!c) return;
-    const w = c.clientWidth || innerWidth;
-    const h = c.clientHeight || innerHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  }
-  window.addEventListener("resize", resize);
-
-  let clock = 0;
-  function animate3D() {
-    requestAnimationFrame(animate3D);
-    if (document.body.classList.contains("inchat") || scrollY > innerHeight * 1.5) return; // save GPU
-    clock += 0.016;
-    pSys.rotation.y = clock * 0.03;
-    books.forEach((b, idx) => {
-      b.m.rotation.x += b.rx;
-      b.m.rotation.y += b.ry;
-      b.m.position.y = b.fy + Math.sin(clock * b.sp + idx) * 0.25;
-    });
-    camera.position.x += (mouseX - camera.position.x) * 0.03;
-    camera.position.y += (1.8 - mouseY - camera.position.y) * 0.03;
-    camera.lookAt(0, 1.0, -4);
-    renderer.render(scene, camera);
-  }
-  animate3D();
-})();
-
-// App initial state
 drawChips();
 drawHist();
 place(true);
