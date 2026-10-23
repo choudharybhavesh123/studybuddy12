@@ -1,10 +1,17 @@
 // Vercel serverless function. The API key stays here, never in the browser.
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
   const b = req.body || {};
   const clean = (s, n) => String(s || "").replace(/\s+/g, " ").trim().slice(0, n);
-  const mode = b.mode === "story" ? "story" : "rush";
+  const mode = ["rush", "homework", "chat"].includes(b.mode) ? b.mode : "story";
+  const subject = clean(b.subject, 60) || "General";
+  const style = clean(b.style, 60) || "Step-by-step";
+  const notes = clean(b.notes, 300);
+  let history = Array.isArray(b.history)
+    ? b.history.slice(-10).map((m) => ({ role: m && m.r === "m" ? "model" : "user", parts: [{ text: String((m && m.t) || "").slice(0, 6000) }] })).filter((m) => m.parts[0].text)
+    : [];
+  while (history.length && history[0].role === "model") history.shift();
   let topic = clean(b.topic, 300);
   const interest = clean(b.interest, 60);
   const lang = ["english", "hinglish"].includes(b.lang) ? b.lang : "auto";
@@ -18,6 +25,7 @@ module.exports = async function handler(req, res) {
   const totalHours = Math.round((days ? examVal * perDay : examVal) * 10) / 10;
 
   if (!topic && !image) return res.status(400).json({ error: "Please enter a subject or topic." });
+  const typed = topic;
   if (!topic) topic = "the question or notes in the attached photo";
   if (mode === "rush" && !syllabus) return res.status(400).json({ error: "Tell us what syllabus is left." });
 
@@ -36,8 +44,28 @@ module.exports = async function handler(req, res) {
     "TONE: Be a bit funny, like a cool older sibling who is good at studies. Add a short, relatable joke or playful line in most sections (exam panic, last-bench, mummy shouting, cricket, memes, chai). Never mock the student. No jokes inside definitions, formulas or practice answers, because accuracy comes first. Keep section headings in English, and write the Exam-ready version in clear English even when explaining in Hinglish.";
   const system = baseSystem + " " + langRule + " " + funRule;
 
+  const interestLine = interest ? `If it helps, use ${interest} for examples.` : "";
+  const chatPrompt = `The student has a follow-up message: "${topic}"
+Answer it using our conversation so far, so you remember what we were discussing. Keep it focused and clear, and keep the same language style. ${interestLine}
+If the follow-up is a new question, answer it fully. If it is a short doubt, answer in a few lines.`;
+  const hwPrompt = `Solve this homework.
+Subject: ${subject}
+${typed ? "Homework text: " + typed : "The homework is in the attached photo."}
+How to write the answers: ${style}
+${notes ? "Teacher's instructions: " + notes : ""}
+Rules:
+- Answer EVERY question you can read. Number them the same way the homework does.
+- Write each answer exactly in the style asked above. For maths and science show every step, and finish with **Answer: ...**.
+- After each answer add one short line starting with "Why:" that explains the idea, so the student learns it.
+- If part of the photo is unreadable, or a question is missing information, say exactly which one. Do not guess.
+- Keep jokes to one short line at the start and one at the end. The answers themselves must be clean and exam-ready.
+- End with "## Quick check": 3 things to verify against the textbook.`;
   const prompt =
-    mode === "rush"
+    mode === "chat"
+      ? chatPrompt
+      : mode === "homework"
+      ? hwPrompt
+      : mode === "rush"
       ? `Build a detailed exam survival plan.
 Subject: ${topic}
 Exam is in: ${examVal} ${days ? "day(s)" : "hour(s)"}
@@ -93,36 +121,61 @@ The proper textbook-style definition in plain words, as it should be written in 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   let lastStatus = 0, lastMsg = "";
 
-  // Ask Google for one answer from one model. Retries if Google is busy.
+  // Ask Google for one answer and STREAM it to the student as it is written.
+  let useThink = true; // skip "thinking" time for speed; turned off if the model rejects it
   async function callModel(model) {
+    let started = false;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const r = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-goog-api-key": key },
             body: JSON.stringify({
               systemInstruction: { parts: [{ text: system }] },
-              contents: [{ role: "user", parts: userParts }],
-              generationConfig: { temperature: 0.7 },
+              contents: [...history, { role: "user", parts: userParts }],
+              generationConfig: useThink ? { temperature: 0.7, thinkingConfig: { thinkingBudget: 0 } } : { temperature: 0.7 },
             }),
           }
         );
-        const data = await r.json().catch(() => ({}));
-        if (r.ok) {
-          const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
-          if (text) return text;
-          lastStatus = 502;
-          lastMsg = data?.promptFeedback?.blockReason ? "Blocked: " + data.promptFeedback.blockReason : "Empty answer";
+        if (!r.ok) {
+          const data = await r.json().catch(() => ({}));
+          lastStatus = r.status;
+          lastMsg = data?.error?.message || "";
+          console.error("Gemini error", model, r.status, lastMsg);
+          if (r.status === 400 && useThink) { useThink = false; continue; }
+          if (r.status === 429 || r.status >= 500) { await sleep(1200 * (attempt + 1)); continue; }
           return null;
         }
-        lastStatus = r.status;
-        lastMsg = data?.error?.message || "";
-        console.error("Gemini error", model, r.status, lastMsg);
-        if (r.status === 429 || r.status >= 500) { await sleep(1200 * (attempt + 1)); continue; }
+        let buf = "";
+        const dec = new TextDecoder();
+        for await (const chunk of r.body) {
+          buf += dec.decode(chunk, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop();
+          for (const ln of lines) {
+            if (!ln.startsWith("data:")) continue;
+            let j;
+            try { j = JSON.parse(ln.slice(5).trim()); } catch (e) { continue; }
+            const t = j?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+            if (t) {
+              if (!started) {
+                started = true;
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "text/plain; charset=utf-8");
+                res.setHeader("Cache-Control", "no-cache, no-transform");
+                res.setHeader("X-Accel-Buffering", "no");
+              }
+              res.write(t);
+            } else if (j?.promptFeedback?.blockReason) lastMsg = "Blocked: " + j.promptFeedback.blockReason;
+          }
+        }
+        if (started) { res.end(); return true; }
+        lastStatus = 502; lastMsg = lastMsg || "Empty answer";
         return null;
       } catch (e) {
+        if (started) { res.end(); return true; } // keep what was already sent
         lastStatus = 500; lastMsg = String(e.message || e);
         await sleep(800);
       }
@@ -168,7 +221,7 @@ The proper textbook-style definition in plain words, as it should be written in 
       if (text) break;
     }
   }
-  if (text) return res.status(200).json({ text });
+  if (text) return; // already streamed
 
   const friendly =
     lastStatus === 429 ? "Too many people are using the free AI right now. Wait a minute and try again."
@@ -177,4 +230,14 @@ The proper textbook-style definition in plain words, as it should be written in 
     : lastStatus === 404 ? "No working AI model was found for this key. Check GEMINI_API_KEY in Vercel."
     : "No answer came back. Try again or rephrase your topic.";
   return res.status(502).json({ error: friendly + (lastStatus ? " [code " + lastStatus + "]" : ""), detail: lastMsg.slice(0, 200) });
+};
+
+// Safety net: any unexpected crash still returns JSON, never a blank server page.
+module.exports = async function (req, res) {
+  try {
+    return await handler(req, res);
+  } catch (e) {
+    console.error("Unhandled error", e);
+    if (!res.headersSent) return res.status(500).json({ error: "Server hiccup: " + String((e && e.message) || e).slice(0, 160) });
+  }
 };

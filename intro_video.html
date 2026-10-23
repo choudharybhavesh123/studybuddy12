@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BigBrainn’t — 3D Cinematic Introduction Video (1080p)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<style>
+:root {
+  --night-deep: #09061A;
+  --night-navy: #130E38;
+  --warm-orange: #FF9F1C;
+  --warm-peach: #FFB37C;
+  --warm-amber: #FFD166;
+  --soft-lilac: #CBB8FF;
+  --electric-violet: #7C6CFF;
+  --mint-clarity: #2EC4B6;
+  --serif: "Playfair Display", Georgia, serif;
+  --sans: "Bricolage Grotesque", system-ui, sans-serif;
+  --mono: "JetBrains Mono", monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #04020C;
+  color: #FFF;
+  font-family: var(--sans);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 16:9 Cinema Container */
+.cinema-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 56.25vw; /* 16:9 ratio */
+  max-height: 100vh;
+  max-width: 177.78vh; /* 16:9 ratio */
+  aspect-ratio: 16 / 9;
+  background: #000;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(124, 108, 255, 0.2);
+  overflow: hidden;
+  user-select: none;
+}
+
+#webglCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+/* Atmospheric Overlay Layers */
+.vignette-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: 
+    radial-gradient(circle at 50% 50%, transparent 55%, rgba(9, 6, 26, 0.75) 100%),
+    linear-gradient(180deg, rgba(9, 6, 26, 0.4) 0%, transparent 20%, transparent 80%, rgba(9, 6, 26, 0.6) 100%);
+}
+
+/* Cinematic Typography Stages */
+.stage-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5% 8%;
+}
+
+.scene-text-block {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6% 9%;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.scene-text-block.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scene 1 Typography */
+.scene1-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(124, 108, 255, 0.2);
+  border: 1px solid rgba(203, 184, 255, 0.35);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: clamp(11px, 1.2vw, 15px);
+  font-weight: 600;
+  color: var(--warm-amber);
+  margin-bottom: 20px;
+  width: fit-content;
+  box-shadow: 0 0 15px rgba(255, 209, 102, 0.25);
+}
+
+.scene1-heading {
+  font-family: var(--serif);
+  font-size: clamp(38px, 5.2vw, 76px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+  max-width: 850px;
+}
+.scene1-heading span {
+  display: block;
+}
+.scene1-heading .italic-highlight {
+  font-style: italic;
+  font-weight: 700;
+  background: linear-gradient(120deg, #FF9F1C, #FFB37C, #FFE28A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Feature Scene Typography (Scenes 2, 3, 4) */
+.feature-badge-pill {
+  font-family: var(--mono);
+  font-size: clamp(13px, 1.4vw, 18px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--warm-orange);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.badge-pill-cyan { color: var(--mint-clarity); }
+.badge-pill-purple { color: var(--soft-lilac); }
+
+.feature-heading-serif {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4.4vw, 64px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: #FFFFFF;
+  text-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
+  max-width: 780px;
+}
+
+/* Scene 5 Product Transition Typography */
+.scene5-center-wrap {
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene5-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  text-shadow: 0 4px 35px rgba(0, 0, 0, 0.9);
+}
+
+.scene5-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, var(--warm-orange) 0%, #FF7A45 100%);
+  color: #120A00;
+  font-family: var(--sans);
+  font-size: clamp(15px, 1.8vw, 22px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 16px 36px;
+  border-radius: 999px;
+  box-shadow: 0 10px 40px rgba(255, 159, 28, 0.5), 0 0 30px rgba(255, 122, 69, 0.4);
+}
+
+/* Modern Video Control Bar (Bottom HUD) */
+.cinema-hud {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 16px 24px;
+  background: linear-gradient(0deg, rgba(4, 2, 12, 0.92) 0%, rgba(4, 2, 12, 0.6) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-track-wrap {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.timeline-progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--warm-orange), var(--mint-clarity));
+  border-radius: 999px;
+  position: relative;
+}
+
+.timeline-thumb {
+  position: absolute;
+  right: -6px;
+  top: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #FFF;
+  box-shadow: 0 0 10px rgba(255, 159, 28, 0.8);
+}
+
+.hud-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hud-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFF;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.hud-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #FFF;
+}
+
+.hud-btn-record {
+  background: linear-gradient(135deg, #FF4D6D, #D90429);
+  border: 0;
+  box-shadow: 0 2px 14px rgba(255, 77, 109, 0.4);
+}
+.hud-btn-record:hover {
+  filter: brightness(1.15);
+}
+
+.hud-time-display {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--soft-lilac);
+}
+
+.hud-scene-jumps {
+  display: flex;
+  gap: 6px;
+}
+
+.scene-jump-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #CCC;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scene-jump-btn:hover, .scene-jump-btn.active {
+  background: var(--electric-violet);
+  color: #FFF;
+  border-color: var(--electric-violet);
+}
+
+.recording-indicator {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  z-index: 20;
+  background: rgba(217, 4, 41, 0.85);
+  color: #FFF;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 20px rgba(217, 4, 41, 0.6);
+}
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #FFF;
+  animation: rec-blink 1s infinite alternate;
+}
+
+@keyframes rec-blink {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="cinema-wrapper" id="cinemaWrapper">
+  <!-- WebGL 3D Canvas -->
+  <canvas id="webglCanvas"></canvas>
+  <div class="vignette-overlay"></div>
+
+  <!-- Recording Badge -->
+  <div class="recording-indicator" id="recBadge">
+    <div class="rec-dot"></div>
+    <span>REC 1080P 60FPS</span>
+  </div>
+
+  <!-- Dynamic Typography Overlays -->
+  <div class="stage-overlay">
+    <!-- Scene 1: Opening -->
+    <div class="scene-text-block" id="textScene1">
+      <div class="scene1-badge">
+        <span>✨</span>
+        <span>A DREAMY 3D STUDY EXPEDITION</span>
+      </div>
+      <h1 class="scene1-heading">
+        <span>School is hard enough.</span>
+        <span class="italic-highlight">Learning shouldn't be.</span>
+      </h1>
+    </div>
+
+    <!-- Scene 2: Exam Game Plan -->
+    <div class="scene-text-block" id="textScene2">
+      <div class="feature-badge-pill">
+        <span>🗺️</span>
+        <span>EXAM GAME PLAN</span>
+      </div>
+      <h2 class="feature-heading-serif">
+        From panic mode<br>to a plan that works.
+      </h2>
+    </div>
+
+    <!-- Scene 3: Homework Helper -->
+    <div class="scene-text-block" id="textScene3">
+      <div class="feature-badge-pill badge-pill-cyan">
+        <span>📚</span>
+        <span>HOMEWORK HELPER</span>
+      </div>
+      <h2 class="feature-heading-serif">
+        Stuck?<br>Let's figure it out together.
+      </h2>
+    </div>
+
+    <!-- Scene 4: Teach Me My Way -->
+    <div class="scene-text-block" id="textScene4">
+      <div class="feature-badge-pill badge-pill-purple">
+        <span>🎮</span>
+        <span>TEACH ME MY WAY</span>
+      </div>
+      <h2 class="feature-heading-serif">
+        Your brain.<br>Your pace. Your way.
+      </h2>
+    </div>
+
+    <!-- Scene 5: Transition to the Actual Product -->
+    <div class="scene-text-block scene5-center-wrap" id="textScene5">
+      <h2 class="scene5-title">
+        Ready for your academic comeback?
+      </h2>
+      <div class="scene5-cta-button">
+        <span>LET'S GET STARTED →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD Video Player Controls -->
+  <div class="cinema-hud" id="cinemaHud">
+    <div class="timeline-track-wrap" id="timelineTrack">
+      <div class="timeline-progress" id="timelineProgress">
+        <div class="timeline-thumb"></div>
+      </div>
+    </div>
+
+    <div class="hud-controls-row">
+      <div class="hud-left">
+        <button type="button" class="hud-btn" id="btnPlayPause">⏸ Pause</button>
+        <button type="button" class="hud-btn" id="btnRestart">↺ Replay</button>
+        <span class="hud-time-display" id="timeDisplay">00:00 / 00:25</span>
+        <button type="button" class="hud-btn hud-btn-record" id="btnRecordVideo">⏺ Export 1080p Video</button>
+      </div>
+
+      <div class="hud-scene-jumps">
+        <button type="button" class="scene-jump-btn active" data-time="0">Scene 1</button>
+        <button type="button" class="scene-jump-btn" data-time="5">Scene 2</button>
+        <button type="button" class="scene-jump-btn" data-time="10">Scene 3</button>
+        <button type="button" class="scene-jump-btn" data-time="15">Scene 4</button>
+        <button type="button" class="scene-jump-btn" data-time="20">Scene 5</button>
+        <button type="button" class="hud-btn" id="btnFullscreen" style="padding:4px 10px;">⛶ Fullscreen</button>
+        <a href="index.html" class="hud-btn" style="text-decoration:none;">🚀 Launch App</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     CINEMATIC 3D ENGINE & ANIMATION CHOREOGRAPHY (Three.js)
+     ========================================================================== -->
+<script>
+const TOTAL_DURATION = 25.0; // Exact 25 seconds master choreography
+let currentTime = 0;
+let isPlaying = true;
+let isRecording = false;
+let mediaRecorder = null;
+let recordedChunks = [];
+
+const canvas = document.getElementById("webglCanvas");
+const wrapper = document.getElementById("cinemaWrapper");
+
+// WebGL Renderer with High-DPI & Anti-aliasing
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+  antialias: true,
+  powerPreference: "high-performance",
+  preserveDrawingBuffer: true
+});
+renderer.setSize(1920, 1080);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("#09061A");
+scene.fog = new THREE.FogExp2("#09061A", 0.022);
+
+const camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.1, 150);
+camera.position.set(0, 2.5, 12);
+
+// ==========================================================================
+// LIGHTING & AMBIENT GLOW
+// ==========================================================================
+const ambientLight = new THREE.AmbientLight("#4A3780", 1.8);
+scene.add(ambientLight);
+
+// Key Warm Sun/Moon Light
+const keyLight = new THREE.DirectionalLight("#FFE2A0", 3.2);
+keyLight.position.set(12, 18, 14);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.width = 2048;
+keyLight.shadow.mapSize.height = 2048;
+scene.add(keyLight);
+
+// Radiant Purple & Orange Rim Fill Lights
+const purpleRim = new THREE.PointLight("#7C6CFF", 5.0, 35);
+purpleRim.position.set(-10, 6, -8);
+scene.add(purpleRim);
+
+const orangeRim = new THREE.PointLight("#FF9F1C", 6.5, 35);
+orangeRim.position.set(10, 4, -4);
+scene.add(orangeRim);
+
+const mintAccent = new THREE.PointLight("#2EC4B6", 3.5, 25);
+mintAccent.position.set(0, -2, 6);
+scene.add(mintAccent);
+
+// ==========================================================================
+// FLOATING STARDUST & GLOWING PARTICLES
+// ==========================================================================
+const particleCount = 1400;
+const particleGeometry = new THREE.BufferGeometry();
+const particlePositions = new Float32Array(particleCount * 3);
+const particleColors = new Float32Array(particleCount * 3);
+
+const colorPalette = [
+  new THREE.Color("#FFD166"),
+  new THREE.Color("#FF9F1C"),
+  new THREE.Color("#CBB8FF"),
+  new THREE.Color("#2EC4B6"),
+  new THREE.Color("#FFFFFF")
+];
+
+for (let i = 0; i < particleCount; i++) {
+  particlePositions[i * 3] = (Math.random() - 0.5) * 60;
+  particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 35;
+  particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 60;
+
+  const col = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  particleColors[i * 3] = col.r;
+  particleColors[i * 3 + 1] = col.g;
+  particleColors[i * 3 + 2] = col.b;
+}
+
+particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+const particleMaterial = new THREE.PointsMaterial({
+  size: 0.16,
+  vertexColors: true,
+  transparent: true,
+  opacity: 0.85,
+  blending: THREE.AdditiveBlending
+});
+
+const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+scene.add(particleSystem);
+
+// ==========================================================================
+// SCENE 1 ASSETS: FLOATING BOOKS, PAPER SHEETS & WINDING PATH
+// ==========================================================================
+const scene1Group = new THREE.Group();
+scene.add(scene1Group);
+
+function create3DBook(coverColorHex, pagesColorHex = "#FFF6E5") {
+  const bookGroup = new THREE.Group();
+  
+  // Hardcover
+  const coverMat = new THREE.MeshStandardMaterial({
+    color: coverColorHex,
+    roughness: 0.35,
+    metalness: 0.15
+  });
+  const coverGeo = new THREE.BoxGeometry(2.2, 0.14, 2.9);
+  const coverMesh = new THREE.Mesh(coverGeo, coverMat);
+  coverMesh.castShadow = true;
+  coverMesh.receiveShadow = true;
+  bookGroup.add(coverMesh);
+
+  // Pages Block
+  const pagesMat = new THREE.MeshStandardMaterial({
+    color: pagesColorHex,
+    roughness: 0.8
+  });
+  const pagesGeo = new THREE.BoxGeometry(2.0, 0.38, 2.7);
+  const pagesMesh = new THREE.Mesh(pagesGeo, pagesMat);
+  pagesMesh.position.set(0.05, 0, 0);
+  bookGroup.add(pagesMesh);
+
+  // Gold Spine Ribbon
+  const ribbonMat = new THREE.MeshStandardMaterial({
+    color: "#FFD166",
+    metalness: 0.8,
+    roughness: 0.2
+  });
+  const ribbonGeo = new THREE.BoxGeometry(0.08, 0.42, 2.92);
+  const ribbonMesh = new THREE.Mesh(ribbonGeo, ribbonMat);
+  ribbonMesh.position.set(-1.0, 0, 0);
+  bookGroup.add(ribbonMesh);
+
+  return bookGroup;
+}
+
+// Instantiate floating books
+const floatingBooks = [];
+const bookColors = ["#3A1F6E", "#D9658A", "#1D1348", "#E07B00", "#1C6B61", "#6C5CFF"];
+
+for (let i = 0; i < 9; i++) {
+  const b = create3DBook(bookColors[i % bookColors.length]);
+  b.position.set(
+    (Math.random() - 0.5) * 16 + (i > 4 ? 6 : -6),
+    (Math.random() - 0.5) * 6 + 1.5,
+    (Math.random() - 0.5) * 14 - 2
+  );
+  b.rotation.set(Math.random() * 0.8, Math.random() * Math.PI, Math.random() * 0.6);
+  b.scale.setScalar(0.75 + Math.random() * 0.4);
+  scene1Group.add(b);
+  floatingBooks.push({
+    mesh: b,
+    rotSpeedX: 0.002 + Math.random() * 0.004,
+    rotSpeedY: 0.003 + Math.random() * 0.005,
+    floatSpeed: 0.8 + Math.random() * 0.8,
+    initY: b.position.y
+  });
+}
+
+// Winding Golden Path
+const pathCurve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(-8, -1.8, 10),
+  new THREE.Vector3(-3, -1.5, 4),
+  new THREE.Vector3(2, -1.2, -2),
+  new THREE.Vector3(0, -0.8, -9),
+  new THREE.Vector3(5, -0.4, -18)
+]);
+const pathGeo = new THREE.TubeGeometry(pathCurve, 64, 0.6, 8, false);
+const pathMat = new THREE.MeshStandardMaterial({
+  color: "#FFB37C",
+  emissive: "#FF9F1C",
+  emissiveIntensity: 0.6,
+  roughness: 0.2,
+  metalness: 0.7
+});
+const pathMesh = new THREE.Mesh(pathGeo, pathMat);
+scene1Group.add(pathMesh);
+
+// ==========================================================================
+// SCENE 2 ASSETS: EXAM GAME PLAN CALENDAR & CARDS
+// ==========================================================================
+const scene2Group = new THREE.Group();
+scene2Group.position.set(0, 0, -22);
+scene.add(scene2Group);
+
+// Large 3D Calendar Desk
+const calBaseGeo = new THREE.BoxGeometry(7.5, 0.3, 5.2);
+const calBaseMat = new THREE.MeshStandardMaterial({
+  color: "#181045",
+  roughness: 0.3,
+  metalness: 0.3
+});
+const calBase = new THREE.Mesh(calBaseGeo, calBaseMat);
+calBase.rotation.x = 0.35;
+scene2Group.add(calBase);
+
+// Floating Priority Cards: MUST, SHOULD, SKIP
+function createPriorityCard(title, colorHex, xPos) {
+  const card = new THREE.Group();
+  const cardMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 0.08, 1.2),
+    new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.2, metalness: 0.4 })
+  );
+  card.add(cardMesh);
+  card.position.set(xPos, 1.4, 0.6);
+  card.rotation.x = 0.2;
+  return card;
+}
+
+const cardMust = createPriorityCard("MUST", "#FF6B8B", -2.2);
+const cardShould = createPriorityCard("SHOULD", "#FFB37C", 0);
+const cardSkip = createPriorityCard("SKIP", "#7C6CFF", 2.2);
+scene2Group.add(cardMust, cardShould, cardSkip);
+
+// ==========================================================================
+// SCENE 3 ASSETS: HOMEWORK HELPER 3D NOTEBOOK & LIGHTBULB
+// ==========================================================================
+const scene3Group = new THREE.Group();
+scene3Group.position.set(0, 0, -44);
+scene.add(scene3Group);
+
+// Open Spiral Notebook
+const nbCoverLeft = new THREE.Mesh(
+  new THREE.BoxGeometry(3.6, 0.08, 4.8),
+  new THREE.MeshStandardMaterial({ color: "#2B1B6D", roughness: 0.4 })
+);
+nbCoverLeft.position.set(-1.85, 0, 0);
+
+const nbCoverRight = new THREE.Mesh(
+  new THREE.BoxGeometry(3.6, 0.08, 4.8),
+  new THREE.MeshStandardMaterial({ color: "#2B1B6D", roughness: 0.4 })
+);
+nbCoverRight.position.set(1.85, 0, 0);
+
+const notebookOpenGroup = new THREE.Group();
+notebookOpenGroup.add(nbCoverLeft, nbCoverRight);
+notebookOpenGroup.rotation.x = 0.45;
+scene3Group.add(notebookOpenGroup);
+
+// Holographic glowing annotations ring
+const ringGeo = new THREE.TorusGeometry(2.4, 0.04, 16, 64);
+const ringMat = new THREE.MeshBasicMaterial({ color: "#2EC4B6" });
+const annotRing = new THREE.Mesh(ringGeo, ringMat);
+annotRing.rotation.x = Math.PI / 2;
+annotRing.position.set(0, 0.8, 0);
+scene3Group.add(annotRing);
+
+// Glowing 3D Lightbulb
+const bulbSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.55, 32, 32),
+  new THREE.MeshStandardMaterial({
+    color: "#FFF5D1",
+    emissive: "#FFD166",
+    emissiveIntensity: 1.8,
+    roughness: 0.1
+  })
+);
+bulbSphere.position.set(0, 2.2, 0);
+scene3Group.add(bulbSphere);
+
+// ==========================================================================
+// SCENE 4 ASSETS: TEACH ME MY WAY EXPANDED BOOK & CONCEPT HOLOGRAM
+// ==========================================================================
+const scene4Group = new THREE.Group();
+scene4Group.position.set(0, 0, -66);
+scene.add(scene4Group);
+
+// Grand Open Radiant Book
+const grandBook = new THREE.Group();
+const leftPage = new THREE.Mesh(
+  new THREE.BoxGeometry(3.5, 0.1, 4.6),
+  new THREE.MeshStandardMaterial({ color: "#FFF8E7", roughness: 0.5 })
+);
+leftPage.position.set(-1.75, 0, 0);
+leftPage.rotation.z = -0.15;
+
+const rightPage = new THREE.Mesh(
+  new THREE.BoxGeometry(3.5, 0.1, 4.6),
+  new THREE.MeshStandardMaterial({ color: "#FFF8E7", roughness: 0.5 })
+);
+rightPage.position.set(1.75, 0, 0);
+rightPage.rotation.z = 0.15;
+
+grandBook.add(leftPage, rightPage);
+grandBook.rotation.x = 0.5;
+scene4Group.add(grandBook);
+
+// Transforming Concept Hologram: Floating Icosahedron + Minecraft Cube
+const prismGeo = new THREE.IcosahedronGeometry(1.2, 0);
+const prismMat = new THREE.MeshStandardMaterial({
+  color: "#CBB8FF",
+  emissive: "#7C6CFF",
+  emissiveIntensity: 0.8,
+  wireframe: true
+});
+const conceptPrism = new THREE.Mesh(prismGeo, prismMat);
+conceptPrism.position.set(-1.8, 2.2, 0);
+scene4Group.add(conceptPrism);
+
+// Minecraft Style 3D Block
+const mcCubeGeo = new THREE.BoxGeometry(1.4, 1.4, 1.4);
+const mcCubeMat = new THREE.MeshStandardMaterial({
+  color: "#2EC4B6",
+  roughness: 0.4,
+  metalness: 0.2
+});
+const mcCube = new THREE.Mesh(mcCubeGeo, mcCubeMat);
+mcCube.position.set(1.8, 2.2, 0);
+scene4Group.add(mcCube);
+
+// ==========================================================================
+// SCENE 5 ASSETS: DETAILED 3D LAPTOP WITH LIVE DASHBOARD SCREEN
+// ==========================================================================
+const scene5Group = new THREE.Group();
+scene5Group.position.set(0, 0, -88);
+scene.add(scene5Group);
+
+// Create Dynamic High-Res Screen Texture (Canvas)
+const screenCanvas = document.createElement("canvas");
+screenCanvas.width = 1920;
+screenCanvas.height = 1200;
+const sCtx = screenCanvas.getContext("2d");
+
+function drawDashboardOnScreen() {
+  // Background
+  sCtx.fillStyle = "#0E0A28";
+  sCtx.fillRect(0, 0, screenCanvas.width, screenCanvas.height);
+
+  // Top Nav Bar
+  sCtx.fillStyle = "#150F38";
+  sCtx.fillRect(0, 0, 1920, 100);
+  sCtx.fillStyle = "#FF9F1C";
+  sCtx.beginPath();
+  sCtx.arc(80, 50, 16, 0, Math.PI * 2);
+  sCtx.fill();
+  sCtx.fillStyle = "#FFFFFF";
+  sCtx.font = "bold 34px 'Bricolage Grotesque', sans-serif";
+  sCtx.fillText("BigBrainn’t", 115, 62);
+
+  // Welcome Header
+  sCtx.fillStyle = "#FFFFFF";
+  sCtx.font = "900 68px 'Playfair Display', serif";
+  sCtx.textAlign = "center";
+  sCtx.fillText("Hey, let's get you unstuck.", 960, 260);
+
+  sCtx.fillStyle = "#B8B0DE";
+  sCtx.font = "32px 'Bricolage Grotesque', sans-serif";
+  sCtx.fillText("What are we figuring out today?", 960, 320);
+
+  // 3 Prominent Dashboard Cards
+  const cards = [
+    { title: "🗺️ Exam Game Plan", desc: "From panic mode to a realistic study schedule.", tag: "01 · EXAM GAME PLAN", border: "#FF9F1C" },
+    { title: "📚 Homework Helper", desc: "Break difficult questions into simple steps.", tag: "02 · HOMEWORK HELPER", border: "#2EC4B6" },
+    { title: "🎮 Teach Me My Way", desc: "Learn your way: simple, analogies, or quizzes.", tag: "03 · TEACH ME MY WAY", border: "#CBB8FF" }
+  ];
+
+  cards.forEach((c, idx) => {
+    const x = 160 + idx * 560;
+    const y = 420;
+    // Glass card background
+    sCtx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    sCtx.strokeStyle = c.border;
+    sCtx.lineWidth = 4;
+    sCtx.beginPath();
+    sCtx.roundRect(x, y, 480, 480, 28);
+    sCtx.fill();
+    sCtx.stroke();
+
+    // Badge
+    sCtx.textAlign = "left";
+    sCtx.fillStyle = c.border;
+    sCtx.font = "bold 20px 'JetBrains Mono', monospace";
+    sCtx.fillText(c.tag, x + 34, y + 60);
+
+    // Title
+    sCtx.fillStyle = "#FFFFFF";
+    sCtx.font = "bold 40px 'Bricolage Grotesque', sans-serif";
+    sCtx.fillText(c.title, x + 34, y + 140);
+
+    // Description
+    sCtx.fillStyle = "#C3BAEE";
+    sCtx.font = "26px 'Bricolage Grotesque', sans-serif";
+    sCtx.fillText(c.desc, x + 34, y + 210, 410);
+
+    // Button Pill
+    sCtx.fillStyle = c.border;
+    sCtx.beginPath();
+    sCtx.roundRect(x + 34, y + 360, 220, 60, 999);
+    sCtx.fill();
+    sCtx.fillStyle = "#0E0A28";
+    sCtx.font = "bold 24px 'Bricolage Grotesque', sans-serif";
+    sCtx.fillText("Launch Tool →", x + 58, y + 400);
+  });
+}
+drawDashboardOnScreen();
+
+const screenTexture = new THREE.CanvasTexture(screenCanvas);
+screenTexture.minFilter = THREE.LinearFilter;
+screenTexture.magFilter = THREE.LinearFilter;
+
+// 3D Laptop Body
+const laptopGroup = new THREE.Group();
+
+// Laptop Base (Chassis)
+const baseMat = new THREE.MeshStandardMaterial({
+  color: "#25203D",
+  metalness: 0.8,
+  roughness: 0.25
+});
+const laptopBase = new THREE.Mesh(new THREE.BoxGeometry(10.5, 0.24, 7.2), baseMat);
+laptopBase.position.set(0, 0, 0);
+laptopGroup.add(laptopBase);
+
+// Keyboard area
+const kbMesh = new THREE.Mesh(
+  new THREE.BoxGeometry(8.8, 0.04, 3.8),
+  new THREE.MeshStandardMaterial({ color: "#110D24", roughness: 0.6 })
+);
+kbMesh.position.set(0, 0.13, -0.6);
+laptopGroup.add(kbMesh);
+
+// Laptop Lid & Screen
+const lidGroup = new THREE.Group();
+lidGroup.position.set(0, 0.12, -3.6);
+
+const lidBack = new THREE.Mesh(
+  new THREE.BoxGeometry(10.5, 7.0, 0.2),
+  baseMat
+);
+lidBack.position.set(0, 3.5, 0);
+lidGroup.add(lidBack);
+
+// Active Glowing Screen
+const screenMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(9.8, 6.2),
+  new THREE.MeshBasicMaterial({ map: screenTexture })
+);
+screenMesh.position.set(0, 3.5, 0.12);
+lidGroup.add(screenMesh);
+
+// Angle lid open at 105 degrees
+lidGroup.rotation.x = 0.18;
+laptopGroup.add(lidGroup);
+
+scene5Group.add(laptopGroup);
+
+// ==========================================================================
+// MASTER CINEMATIC CAMERA CHOREOGRAPHY & TIMELINE
+// ==========================================================================
+function updateCameraAndScene(t) {
+  // Rotate stardust
+  particleSystem.rotation.y = t * 0.04;
+
+  // Float Scene 1 books
+  floatingBooks.forEach((fb, idx) => {
+    fb.mesh.rotation.x += fb.rotSpeedX;
+    fb.mesh.rotation.y += fb.rotSpeedY;
+    fb.mesh.position.y = fb.initY + Math.sin(t * fb.floatSpeed + idx) * 0.35;
+  });
+
+  // Scene 2 animations
+  cardMust.rotation.y = Math.sin(t * 1.5) * 0.15;
+  cardShould.rotation.y = Math.sin(t * 1.5 + 1) * 0.15;
+  cardSkip.rotation.y = Math.sin(t * 1.5 + 2) * 0.15;
+
+  // Scene 3 animations
+  annotRing.rotation.z = t * 0.4;
+  bulbSphere.position.y = 2.2 + Math.sin(t * 2.5) * 0.18;
+
+  // Scene 4 animations
+  conceptPrism.rotation.x = t * 0.8;
+  conceptPrism.rotation.y = t * 0.6;
+  mcCube.rotation.x = t * 0.5;
+  mcCube.rotation.y = t * 0.7;
+
+  // Spline Camera Keyframing
+  if (t < 5.0) {
+    // SCENE 1: (0s - 5s)
+    const p = t / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(0.8, -1.2, p);
+    camera.position.y = THREE.MathUtils.lerp(2.8, 1.8, p);
+    camera.position.z = THREE.MathUtils.lerp(12.0, 4.0, p);
+    camera.lookAt(0, 1.2, -2);
+    setTypographyState(1);
+  } else if (t < 10.0) {
+    // SCENE 2: (5s - 10s)
+    const p = (t - 5.0) / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(-1.2, 2.0, p);
+    camera.position.y = THREE.MathUtils.lerp(1.8, 3.2, p);
+    camera.position.z = THREE.MathUtils.lerp(4.0, -16.0, p);
+    camera.lookAt(0, 1.0, -22);
+    setTypographyState(2);
+  } else if (t < 15.0) {
+    // SCENE 3: (10s - 15s)
+    const p = (t - 10.0) / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(2.0, -0.8, p);
+    camera.position.y = THREE.MathUtils.lerp(3.2, 2.2, p);
+    camera.position.z = THREE.MathUtils.lerp(-16.0, -38.0, p);
+    camera.lookAt(0, 1.4, -44);
+    setTypographyState(3);
+  } else if (t < 20.0) {
+    // SCENE 4: (15s - 20s)
+    const p = (t - 15.0) / 5.0;
+    camera.position.x = THREE.MathUtils.lerp(-0.8, 1.5, p);
+    camera.position.y = THREE.MathUtils.lerp(2.2, 2.8, p);
+    camera.position.z = THREE.MathUtils.lerp(-38.0, -60.0, p);
+    camera.lookAt(0, 1.6, -66);
+    setTypographyState(4);
+  } else {
+    // SCENE 5: (20s - 25s) Smooth zoom directly into the laptop screen
+    const p = (t - 20.0) / 5.0;
+    // Exponential ease-in to fill frame smoothly
+    const easeP = p * p;
+    camera.position.x = THREE.MathUtils.lerp(0, 0, p);
+    camera.position.y = THREE.MathUtils.lerp(2.6, 3.65, p);
+    // Move from distance directly right up against the laptop screen
+    camera.position.z = THREE.MathUtils.lerp(-74.0, -84.15, easeP);
+    camera.lookAt(0, 3.65, -88);
+    setTypographyState(5);
+  }
+}
+
+function setTypographyState(activeSceneNum) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById("textScene" + i);
+    if (!el) continue;
+    if (i === activeSceneNum) {
+      el.classList.add("active");
+    } else {
+      el.classList.remove("active");
+    }
+  }
+
+  // Update scene jump pills
+  document.querySelectorAll(".scene-jump-btn").forEach((btn, idx) => {
+    btn.classList.toggle("active", (idx + 1) === activeSceneNum);
+  });
+}
+
+// ==========================================================================
+// RENDER LOOP & TIMELINE CONTROLLER
+// ==========================================================================
+let lastTimestamp = performance.now();
+
+function animate(now) {
+  requestAnimationFrame(animate);
+
+  const delta = (now - lastTimestamp) / 1000;
+  lastTimestamp = now;
+
+  if (isPlaying) {
+    currentTime += delta;
+    if (currentTime >= TOTAL_DURATION) {
+      if (isRecording) {
+        stopVideoRecording();
+      }
+      currentTime = TOTAL_DURATION;
+      isPlaying = false;
+      document.getElementById("btnPlayPause").textContent = "▶ Play";
+    }
+  }
+
+  updateCameraAndScene(currentTime);
+  renderer.render(scene, camera);
+
+  // Update HUD
+  const progressPercent = (currentTime / TOTAL_DURATION) * 100;
+  document.getElementById("timelineProgress").style.width = progressPercent + "%";
+  
+  const curSec = Math.floor(currentTime);
+  const curMillis = Math.floor((currentTime % 1) * 10);
+  document.getElementById("timeDisplay").textContent = 
+    `00:${curSec < 10 ? '0' : ''}${curSec}.${curMillis} / 00:25`;
+}
+requestAnimationFrame(animate);
+
+// ==========================================================================
+// USER CONTROLS & HUD ACTIONS
+// ==========================================================================
+document.getElementById("btnPlayPause").onclick = () => {
+  isPlaying = !isPlaying;
+  document.getElementById("btnPlayPause").textContent = isPlaying ? "⏸ Pause" : "▶ Play";
+};
+
+document.getElementById("btnRestart").onclick = () => {
+  currentTime = 0;
+  isPlaying = true;
+  document.getElementById("btnPlayPause").textContent = "⏸ Pause";
+};
+
+document.querySelectorAll(".scene-jump-btn").forEach(btn => {
+  btn.onclick = () => {
+    currentTime = parseFloat(btn.dataset.time);
+    isPlaying = true;
+    document.getElementById("btnPlayPause").textContent = "⏸ Pause";
+  };
+});
+
+document.getElementById("timelineTrack").onclick = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const clickFraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  currentTime = clickFraction * TOTAL_DURATION;
+};
+
+document.getElementById("btnFullscreen").onclick = () => {
+  if (!document.fullscreenElement) {
+    wrapper.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+};
+
+// ==========================================================================
+// 1080P VIDEO RECORDER (MediaRecorder Export)
+// ==========================================================================
+function startVideoRecording() {
+  recordedChunks = [];
+  const stream = canvas.captureStream(60); // 60 FPS 1080p stream
+  
+  let options = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 16000000 };
+  if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+    options = { mimeType: 'video/webm', videoBitsPerSecond: 12000000 };
+  }
+
+  try {
+    mediaRecorder = new MediaRecorder(stream, options);
+  } catch(e) {
+    alert("MediaRecorder is not supported in this browser environment.");
+    return;
+  }
+
+  mediaRecorder.ondataavailable = (event) => {
+    if (event.data && event.data.size > 0) {
+      recordedChunks.push(event.data);
+    }
+  };
+
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = "BigBrainnt_Cinematic_3D_Intro_1080p.webm";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  };
+
+  isRecording = true;
+  document.getElementById("recBadge").style.display = "inline-flex";
+  document.getElementById("btnRecordVideo").textContent = "⏹ Recording...";
+  currentTime = 0;
+  isPlaying = true;
+  mediaRecorder.start();
+}
+
+function stopVideoRecording() {
+  if (mediaRecorder && isRecording) {
+    mediaRecorder.stop();
+    isRecording = false;
+    document.getElementById("recBadge").style.display = "none";
+    document.getElementById("btnRecordVideo").textContent = "⏺ Export 1080p Video";
+  }
+}
+
+document.getElementById("btnRecordVideo").onclick = () => {
+  if (!isRecording) {
+    startVideoRecording();
+  } else {
+    stopVideoRecording();
+  }
+};
+
+// Auto-record if parameter ?autorecord=1 is present
+if (window.location.search.includes("autorecord=1")) {
+  window.addEventListener("load", () => {
+    setTimeout(startVideoRecording, 800);
+  });
+}
+
+// Handle window resizing
+window.addEventListener("resize", () => {
+  camera.aspect = 16 / 9;
+  camera.updateProjectionMatrix();
+});
+</script>
+
+</body>
+</html>

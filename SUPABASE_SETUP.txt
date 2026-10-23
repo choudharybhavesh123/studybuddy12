@@ -1,0 +1,21 @@
+LOGIN SETUP (free, about 10 minutes)
+
+1. Go to supabase.com, sign up free, click "New project". Pick any name and a database password. Wait ~2 minutes.
+2. Left menu: SQL Editor -> New query -> paste everything between the lines below -> Run.
+-----
+create table chats (
+  id bigint generated always as identity primary key,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  k text, title text, text text,
+  created_at timestamptz default now()
+);
+alter table chats enable row level security;
+create policy "own chats" on chats for all
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-----
+3. Left menu: Project Settings -> API. Copy the "Project URL" and the "anon public" key.
+   (Never use the "service_role" key. It must stay secret.)
+4. Open config.js (NOT index.html). Paste the URL and the anon key between the quotes. Save and upload config.js to GitHub.
+5. Left menu: Authentication -> Providers -> Email. For testing, you can turn OFF "Confirm email" so signup works instantly.
+   Authentication -> URL Configuration: set Site URL to your .vercel.app link.
+6. Reload the site. A "Log in / Sign up" button appears in the sidebar.
